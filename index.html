@@ -993,10 +993,14 @@ function attachRowListeners(){
 
       state[key] = true;
 
-      // บันทึกค่าลงเครื่อง
+      // บันทึก Progress
       saveState();
-      render();
+
+      // แสดงรูปและเล่นเสียงก่อน
       showSuccessPopup();
+
+      // เปลี่ยนปุ่มเป็น DONE และอัปเดต Progress
+      render();
     });
   });
 
@@ -1014,38 +1018,61 @@ const successStage = document.getElementById('successStage');
 
 function showSuccessPopup(){
 
-  // เล่นเสียง
- successSound.currentTime = 0;
-successSound.play().catch(() => {});
-  // clear old stars
-  successStage.querySelectorAll('.star').forEach(s => s.remove());
-  const starChars = ['★','✦','✧','✩'];
-  for(let i=0;i<10;i++){
-    const s = document.createElement('span');
-    s.className = 'star';
-    s.textContent = starChars[i % starChars.length];
-    const angle = (Math.PI*2/10)*i;
-    const dist = 120 + Math.random()*60;
-    const sx = Math.cos(angle)*dist;
-    const sy = Math.sin(angle)*dist;
-    s.style.setProperty('--sx', sx+'px');
-    s.style.setProperty('--sy', sy+'px');
-    s.style.left = '50%';
-    s.style.top = '50%';
-    s.style.animationDelay = (Math.random()*0.15)+'s';
-    successStage.appendChild(s);
-  }
-
+  // แสดง Popup ก่อน
   successOverlay.classList.remove('fadeout');
   successStage.classList.remove('pop');
-  void successStage.offsetWidth; // reflow to restart animation
+
+  // ลบดาวเก่า
+  successStage.querySelectorAll('.star').forEach(star => star.remove());
+
+  const starChars = ['★', '✦', '✧', '✩'];
+
+  for(let i = 0; i < 10; i++){
+    const star = document.createElement('span');
+
+    star.className = 'star';
+    star.textContent = starChars[i % starChars.length];
+
+    const angle = (Math.PI * 2 / 10) * i;
+    const distance = 120 + Math.random() * 60;
+
+    star.style.setProperty('--sx', `${Math.cos(angle) * distance}px`);
+    star.style.setProperty('--sy', `${Math.sin(angle) * distance}px`);
+    star.style.left = '50%';
+    star.style.top = '50%';
+    star.style.animationDelay = `${Math.random() * 0.15}s`;
+
+    successStage.appendChild(star);
+  }
+
+  // บังคับเริ่ม Animation ใหม่
+  void successStage.offsetWidth;
+
   successOverlay.classList.add('show');
   successStage.classList.add('pop');
 
+  // เล่นเสียง โดยไม่ให้ Error ของเสียงหยุด Popup
+  try {
+    successSound.pause();
+    successSound.currentTime = 0;
+
+    const playPromise = successSound.play();
+
+    if(playPromise !== undefined){
+      playPromise.catch(error => {
+        console.warn('Success sound เล่นไม่ได้:', error);
+      });
+    }
+  } catch(error) {
+    console.warn('Success sound error:', error);
+  }
+
   setTimeout(() => {
     successOverlay.classList.add('fadeout');
+
     setTimeout(() => {
-      successOverlay.classList.remove('show','fadeout');
+      successOverlay.classList.remove('show', 'fadeout');
+      successStage.classList.remove('pop');
     }, 420);
   }, 1600);
 }
