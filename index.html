@@ -1152,11 +1152,51 @@ document.getElementById('memoryClearBtn').addEventListener('click', () => {
   drawMemoryCanvas();
 });
 
-document.getElementById('memoryDownloadBtn').addEventListener('click', () => {
-  const link = document.createElement('a');
-  link.download = 'shanghai_memories_2026.png';
-  link.href = memoryCanvas.toDataURL('image/png');
-  link.click();
+document.getElementById('memoryDownloadBtn').addEventListener('click', async () => {
+  drawMemoryCanvas();
+
+  memoryCanvas.toBlob(async (blob) => {
+    if (!blob) {
+      alert('ไม่สามารถสร้างรูปภาพได้');
+      return;
+    }
+
+    const file = new File(
+      [blob],
+      'shanghai_memories_2026.png',
+      { type: 'image/png' }
+    );
+
+    // มือถือที่รองรับ Share Sheet เช่น iPhone / Android
+    if (
+      navigator.share &&
+      navigator.canShare &&
+      navigator.canShare({ files: [file] })
+    ) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: 'Shanghai Memories 2026'
+        });
+        return;
+      } catch (error) {
+        if (error.name === 'AbortError') return;
+      }
+    }
+
+    // คอมพิวเตอร์และเบราว์เซอร์ทั่วไป
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = 'shanghai_memories_2026.png';
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, 'image/png');
 });
 
 document.getElementById('memoryCloseBtn').addEventListener('click', () => {
