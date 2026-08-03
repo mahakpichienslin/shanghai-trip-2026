@@ -995,10 +995,8 @@ function attachRowListeners(){
 
       // บันทึกค่าลงเครื่อง
       saveState();
-
       render();
-      loadState();
-      render();
+      showSuccessPopup();
     });
   });
 
@@ -1069,6 +1067,7 @@ document.getElementById('confirmYes').addEventListener('click', () => {
     Object.keys(state).forEach(k => {
       if(k.startsWith(`d${pendingResetKey}-`)) state[k] = false;
     });
+    saveState();
     render();
   }
   closeConfirm();
@@ -1510,6 +1509,7 @@ document.getElementById('startBtn').addEventListener('click', () => {
 
 });
 
+loadState();
 render();
 </script>
 </body>
