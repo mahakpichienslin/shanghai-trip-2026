@@ -236,6 +236,69 @@ body{
   letter-spacing:2px;
 }
 
+  /* ---------- WEATHER CARD ---------- */
+.weather-card{
+  padding:16px;
+  margin-bottom:18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-height:110px;
+}
+
+.weather-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.weather-icon{
+  font-size:46px;
+  line-height:1;
+}
+
+.weather-city{
+  font-family:'Press Start 2P', cursive;
+  font-size:12px;
+  color:var(--red-dark);
+  margin-bottom:8px;
+}
+
+.weather-description{
+  font-size:19px;
+  color:#5a4326;
+}
+
+.weather-right{
+  text-align:right;
+}
+
+.weather-temp{
+  font-family:'Press Start 2P', cursive;
+  font-size:25px;
+  color:var(--red-dark);
+  margin-bottom:8px;
+}
+
+.weather-extra{
+  font-size:16px;
+  color:#5a4326;
+}
+
+.weather-status{
+  font-size:17px;
+  color:#5a4326;
+}
+
+.weather-refresh{
+  border:none;
+  background:transparent;
+  font-size:22px;
+  cursor:pointer;
+  padding:4px;
+}
+
 .section-label{
   font-family:'Press Start 2P', cursive;
   background: var(--yellow);
@@ -651,6 +714,35 @@ body{
 <!-- ============ SCREEN 2: MAIN PAGE ============ -->
 <div id="mainPage">
   <div class="page-title pixel-font">SHANGHAI TRIP</div>
+  <div class="weather-card pixel-box" id="weatherCard">
+
+  <div class="weather-left">
+    <div class="weather-icon" id="weatherIcon">⏳</div>
+
+    <div>
+      <div class="weather-city">SHANGHAI</div>
+      <div class="weather-description" id="weatherDescription">
+        กำลังโหลดสภาพอากาศ...
+      </div>
+
+      <button
+        class="weather-refresh"
+        id="weatherRefreshBtn"
+        type="button"
+        aria-label="Refresh weather"
+      >
+        ↻
+      </button>
+    </div>
+  </div>
+
+  <div class="weather-right">
+    <div class="weather-temp" id="weatherTemp">--°C</div>
+    <div class="weather-extra" id="weatherExtra">ลม -- km/h</div>
+    <div class="weather-status" id="weatherUpdated"></div>
+  </div>
+
+</div>
 
   <div class="section-label">FLIGHT</div>
   <div class="pixel-box flight-card">
