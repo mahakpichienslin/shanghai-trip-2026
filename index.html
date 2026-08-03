@@ -962,16 +962,45 @@ function updateProgress(){
   document.getElementById('progressBar').style.width = pct + '%';
 }
 
+const STORAGE_KEY = 'shanghaiTrip2026State';
+
+function saveState(){
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(state)
+  );
+}
+
+function loadState(){
+  const saved = localStorage.getItem(STORAGE_KEY);
+
+  if (!saved) return;
+
+  try {
+    const savedState = JSON.parse(saved);
+    Object.assign(state, savedState);
+  } catch (error) {
+    console.error('โหลดข้อมูลไม่สำเร็จ:', error);
+  }
+}
+  
 function attachRowListeners(){
   document.querySelectorAll('[data-role="successBtn"]').forEach(btn => {
     btn.addEventListener('click', () => {
       const key = btn.getAttribute('data-key');
+
       if(state[key]) return;
+
       state[key] = true;
+
+      // บันทึกค่าลงเครื่อง
+      saveState();
+
       render();
       showSuccessPopup();
     });
   });
+
   document.querySelectorAll('[data-role="resetBtn"]').forEach(btn => {
     btn.addEventListener('click', () => {
       pendingResetKey = btn.getAttribute('data-day');
