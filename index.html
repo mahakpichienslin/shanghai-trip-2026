@@ -813,34 +813,62 @@ body{
 
 /* ---------- POPUP: END TRIP ---------- */
 #endOverlay{
-  position:fixed; inset:0;
-  background: rgba(0,0,0,0.65);
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.65);
   display:none;
   align-items:center;
   justify-content:center;
-  z-index: 100;
+  z-index:100;
   padding:20px;
+  overflow:hidden;
 }
-#endOverlay.show{ display:flex; }
+
+#endOverlay.show{
+  display:flex;
+}
+
+/* พื้นที่วาดพลุ */
+#fireworks{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:1;
+}
+
+/* กล่องข้อความต้องอยู่เหนือพลุ */
 .end-box{
-  padding: 26px 22px;
-  max-width: 340px;
+  position:relative;
+  z-index:2;
+  padding:26px 22px;
+  max-width:340px;
   text-align:center;
 }
+
 .end-box .pixel-font-title{
   font-family:'Press Start 2P', cursive;
   font-size:18px;
-  color: var(--red-dark);
+  color:var(--red-dark);
   margin-bottom:14px;
   line-height:1.5;
 }
-.end-box p{ font-size:20px; margin-bottom:18px; }
+
+.end-box p{
+  font-size:20px;
+  margin-bottom:18px;
+}
+
 .end-actions{
   display:flex;
   flex-direction:column;
   gap:10px;
 }
-.memory-btn{ background: var(--yellow); }
+
+.memory-btn{
+  background:var(--yellow);
+}
 
 /* ---------- MEMORY TEMPLATE MODAL ---------- */
 #memoryOverlay{
@@ -1121,13 +1149,27 @@ body{
 
 <!-- ============ END TRIP POPUP ============ -->
 <div id="endOverlay">
+
+  <!-- พลุ -->
+  <canvas id="fireworks"></canvas>
+
   <div class="pixel-box end-box">
     <div class="pixel-font-title">⭐️TRIP COMPLETE⭐️</div>
-    <p id="endSummaryText">คุณไปเที่ยวครบ 0/0 สถานที่</p>
+
+    <p id="endSummaryText">
+      คุณไปเที่ยวครบ 0/0 สถานที่
+    </p>
+
     <div class="end-actions">
-      <button class="pixel-btn memory-btn" id="memoryBtn">📸 รูปความทรงจำ</button>
-      <button class="pixel-btn" id="endCloseBtn">ปิด</button>
+      <button class="pixel-btn memory-btn" id="memoryBtn">
+        📸 รูปความทรงจำ
+      </button>
+
+      <button class="pixel-btn" id="endCloseBtn">
+        ปิด
+      </button>
     </div>
+
   </div>
 </div>
 
