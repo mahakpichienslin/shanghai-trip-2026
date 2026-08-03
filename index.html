@@ -431,6 +431,103 @@ body{
 }
 .section-label-row .section-label{ margin:0; }
 
+  /* ---------- TRAVEL REMINDER BUTTON ---------- */
+.reminder-btn{
+  font-family:'Press Start 2P', cursive;
+  background:var(--ink);
+  color:var(--yellow);
+  border:3px solid var(--ink);
+  padding:9px 12px;
+  font-size:10px;
+  cursor:pointer;
+  box-shadow:3px 3px 0 var(--pixel-shadow);
+}
+
+.reminder-btn:active{
+  transform:translate(3px,3px);
+  box-shadow:none;
+}
+
+/* ---------- TRAVEL REMINDER POPUP ---------- */
+#reminderOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.68);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:120;
+  padding:16px;
+}
+
+#reminderOverlay.show{
+  display:flex;
+}
+
+.reminder-box{
+  width:min(92vw, 520px);
+  max-height:86vh;
+  overflow-y:auto;
+  padding:22px 18px;
+}
+
+.reminder-title{
+  font-family:'Press Start 2P', cursive;
+  color:var(--red-dark);
+  font-size:15px;
+  line-height:1.5;
+  text-align:center;
+  margin-bottom:18px;
+}
+
+.reminder-section{
+  margin-bottom:18px;
+}
+
+.reminder-section-title{
+  font-family:'Press Start 2P', cursive;
+  color:var(--red-dark);
+  font-size:10px;
+  line-height:1.5;
+  margin-bottom:10px;
+}
+
+.reminder-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.reminder-item{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  font-size:18px;
+  line-height:1.3;
+  padding-bottom:8px;
+  border-bottom:2px dotted #b89a5e;
+}
+
+.reminder-item input{
+  width:20px;
+  height:20px;
+  flex-shrink:0;
+  margin-top:2px;
+}
+
+.reminder-note{
+  background:#ffe7a5;
+  border:3px solid var(--ink);
+  padding:12px;
+  font-size:18px;
+  line-height:1.35;
+  margin:16px 0;
+}
+
+.reminder-close{
+  width:100%;
+}
+
 /* ---------- walking mascot lane: spans whole Travel Plans section ---------- */
 .travel-plans-wrapper{
   position:relative;
@@ -853,7 +950,17 @@ body{
 
 </div>
 
+  <div class="section-label-row">
   <div class="section-label">FLIGHT</div>
+
+  <button
+    class="reminder-btn"
+    id="reminderBtn"
+    type="button"
+  >
+    ⚠ CHECK
+  </button>
+</div>
   <div class="pixel-box flight-card">
     <div class="airline">THAI AIRWAYS · TG662</div>
     <div class="flight-route">
@@ -896,6 +1003,103 @@ body{
   <button class="pixel-btn end-btn pixel-font" id="endTripBtn">🏁 END TRIP</button>
 </div>
 
+  <!-- ============ TRAVEL REMINDER POPUP ============ -->
+<div id="reminderOverlay">
+  <div class="pixel-box reminder-box">
+
+    <div class="reminder-title">
+      🎒 BEFORE YOU GO
+    </div>
+
+    <div class="reminder-section">
+      <div class="reminder-section-title">IMPORTANT</div>
+
+      <div class="reminder-list">
+        <label class="reminder-item">
+          <input type="checkbox" data-reminder="passport">
+          <span>พาสปอร์ต</span>
+        </label>
+
+        <label class="reminder-item">
+          <input type="checkbox" data-reminder="insurance">
+          <span>ประกันการเดินทาง และเบอร์ติดต่อบริษัทประกัน</span>
+        </label>
+
+        <label class="reminder-item">
+          <input type="checkbox" data-reminder="esim">
+          <span>ซื้อและติดตั้ง eSIM</span>
+        </label>
+
+        <label class="reminder-item">
+          <input type="checkbox" data-reminder="money">
+          <span>เงินสดหยวน บัตรเครดิต และช่องทางชำระเงินสำรอง</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="reminder-section">
+      <div class="reminder-section-title">APPS</div>
+
+      <div class="reminder-list">
+        <label class="reminder-item">
+          <input type="checkbox" data-reminder="alipay">
+          <span>Alipay หรือ WeChat สำหรับชำระเงิน</span>
+        </label>
+
+        <label class="reminder-item">
+          <input type="checkbox" data-reminder="metroman">
+          <span>MetroMan สำหรับดูเส้นทางรถไฟใต้ดิน</span>
+        </label>
+
+        <label class="reminder-item">
+          <input type="checkbox" data-reminder="maps">
+          <span>Apple Maps สำหรับดูแผนที่และเส้นทาง</span>
+        </label>
+
+        <label class="reminder-item">
+          <input type="checkbox" data-reminder="offline">
+          <span>บันทึกโรงแรม ตั๋วเครื่องบิน และข้อมูลสำคัญแบบ Offline</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="reminder-section">
+      <div class="reminder-section-title">EMERGENCY</div>
+
+      <div class="reminder-list">
+        <label class="reminder-item">
+          <input type="checkbox" data-reminder="consulate">
+          <span>
+            สถานกงสุลใหญ่ ณ นครเซี่ยงไฮ้<br>
+            +86 185-1626-8776
+          </span>
+        </label>
+
+        <label class="reminder-item">
+          <input type="checkbox" data-reminder="emergency">
+          <span>
+            ตำรวจ 110 · รถพยาบาล 120 · ดับเพลิง 119
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <div class="reminder-note">
+      ⚠ เช็กของให้ครบก่อนออกจากบ้าน ก่อนออกจากโรงแรม
+      และก่อนเดินทางกลับประเทศไทย
+    </div>
+
+    <button
+      class="pixel-btn reminder-close"
+      id="reminderCloseBtn"
+      type="button"
+    >
+      ปิด
+    </button>
+
+  </div>
+</div>
+  
 <!-- ============ SUCCESS POPUP ============ -->
 <div id="successOverlay">
   <div class="success-stage" id="successStage">
@@ -1186,6 +1390,69 @@ function showSuccessPopup(){
   }, 1600);
 }
 
+  /* ================= TRAVEL REMINDER POPUP ================= */
+const reminderOverlay = document.getElementById('reminderOverlay');
+const reminderBtn = document.getElementById('reminderBtn');
+const reminderCloseBtn = document.getElementById('reminderCloseBtn');
+
+const REMINDER_STORAGE_KEY = 'shanghaiTrip2026Reminder';
+
+function loadReminderChecklist(){
+  let savedReminder = {};
+
+  try{
+    savedReminder =
+      JSON.parse(localStorage.getItem(REMINDER_STORAGE_KEY)) || {};
+  }catch(error){
+    console.error('โหลด Reminder ไม่สำเร็จ:', error);
+  }
+
+  document
+    .querySelectorAll('[data-reminder]')
+    .forEach(input => {
+      input.checked = Boolean(savedReminder[input.dataset.reminder]);
+    });
+}
+
+function saveReminderChecklist(){
+  const reminderState = {};
+
+  document
+    .querySelectorAll('[data-reminder]')
+    .forEach(input => {
+      reminderState[input.dataset.reminder] = input.checked;
+    });
+
+  localStorage.setItem(
+    REMINDER_STORAGE_KEY,
+    JSON.stringify(reminderState)
+  );
+}
+
+function openReminder(){
+  loadReminderChecklist();
+  reminderOverlay.classList.add('show');
+}
+
+function closeReminder(){
+  reminderOverlay.classList.remove('show');
+}
+
+reminderBtn.addEventListener('click', openReminder);
+reminderCloseBtn.addEventListener('click', closeReminder);
+
+document
+  .querySelectorAll('[data-reminder]')
+  .forEach(input => {
+    input.addEventListener('change', saveReminderChecklist);
+  });
+
+reminderOverlay.addEventListener('click', event => {
+  if(event.target === reminderOverlay){
+    closeReminder();
+  }
+});
+  
 /* ================= CONFIRM RESET POPUP ================= */
 const confirmOverlay = document.getElementById('confirmOverlay');
 document.getElementById('confirmText').textContent = 'คุณจะ Reset การไปสถานที่ในวันนี้ใช่ไหม?';
