@@ -815,7 +815,7 @@ body{
 #endOverlay{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.65);
+  background:rgba(0,0,0,0.72);
   display:none;
   align-items:center;
   justify-content:center;
@@ -828,7 +828,7 @@ body{
   display:flex;
 }
 
-  #fireworkLayer{
+#fireworkLayer{
   position:absolute;
   inset:0;
   overflow:hidden;
@@ -840,39 +840,50 @@ body{
   position:absolute;
   width:8px;
   height:8px;
-  background:var(--yellow);
-  box-shadow:0 0 8px currentColor;
+  border:2px solid rgba(0,0,0,0.25);
   opacity:0;
-  animation:fireworkBurst 1.1s ease-out forwards;
+  transform:translate(-50%,-50%);
+  animation:fireworkBurst 1.15s cubic-bezier(.15,.72,.25,1) forwards;
+  image-rendering:pixelated;
+}
+
+.firework-particle.sparkle{
+  width:5px;
+  height:5px;
+  animation-duration:1.45s;
 }
 
 @keyframes fireworkBurst{
   0%{
     opacity:1;
-    transform:translate(0,0) scale(1);
+    transform:translate(-50%,-50%) translate(0,0) scale(1.15) rotate(0deg);
   }
-
+  70%{
+    opacity:1;
+  }
   100%{
     opacity:0;
-    transform:
-      translate(var(--fx), var(--fy))
-      scale(0.4)
-      rotate(180deg);
+    transform:translate(-50%,-50%) translate(var(--fx),var(--fy)) scale(0.25) rotate(220deg);
   }
 }
 
-.end-box{
-  position:relative;
-  z-index:2;
-}
-
-/* กล่องข้อความต้องอยู่เหนือพลุ */
 .end-box{
   position:relative;
   z-index:2;
   padding:26px 22px;
+  width:min(88vw,340px);
   max-width:340px;
   text-align:center;
+}
+
+#endOverlay.show .end-box{
+  animation:endBoxVictory .7s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+@keyframes endBoxVictory{
+  0%{ opacity:0; transform:scale(.45) translateY(35px) rotate(-3deg); }
+  65%{ opacity:1; transform:scale(1.08) translateY(-6px) rotate(1deg); }
+  100%{ opacity:1; transform:scale(1) translateY(0) rotate(0deg); }
 }
 
 .end-box .pixel-font-title{
@@ -881,6 +892,15 @@ body{
   color:var(--red-dark);
   margin-bottom:14px;
   line-height:1.5;
+}
+
+#endOverlay.show .pixel-font-title{
+  animation:victoryTitlePulse 1s ease-in-out .65s 2;
+}
+
+@keyframes victoryTitlePulse{
+  0%,100%{ transform:scale(1); }
+  50%{ transform:scale(1.08); }
 }
 
 .end-box p{
@@ -1175,75 +1195,7 @@ body{
   </div>
 </div>
 
-const fireworkLayer = document.getElementById('fireworkLayer');
 
-function createFirework(x, y){
-  const colors = [
-    '#FFC93C',
-    '#FFFFFF',
-    '#FF5A4F',
-    '#FFD700',
-    '#65D6FF'
-  ];
-
-  const particleCount = 24;
-
-  for(let i = 0; i < particleCount; i++){
-    const particle = document.createElement('span');
-    particle.className = 'firework-particle';
-
-    const angle = (Math.PI * 2 / particleCount) * i;
-    const distance = 70 + Math.random() * 90;
-
-    particle.style.left = `${x}px`;
-    particle.style.top = `${y}px`;
-
-    particle.style.setProperty(
-      '--fx',
-      `${Math.cos(angle) * distance}px`
-    );
-
-    particle.style.setProperty(
-      '--fy',
-      `${Math.sin(angle) * distance}px`
-    );
-
-    particle.style.background =
-      colors[Math.floor(Math.random() * colors.length)];
-
-    fireworkLayer.appendChild(particle);
-
-    setTimeout(() => {
-      particle.remove();
-    }, 1200);
-  }
-}
-
-function launchVictoryFireworks(){
-  fireworkLayer.innerHTML = '';
-
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-
-  createFirework(width * 0.25, height * 0.30);
-
-  setTimeout(() => {
-    createFirework(width * 0.75, height * 0.26);
-  }, 300);
-
-  setTimeout(() => {
-    createFirework(width * 0.50, height * 0.18);
-  }, 600);
-
-  setTimeout(() => {
-    createFirework(width * 0.20, height * 0.58);
-  }, 900);
-
-  setTimeout(() => {
-    createFirework(width * 0.80, height * 0.55);
-  }, 1200);
-}
-  
 <!-- ============ END TRIP POPUP ============ -->
 <div id="endOverlay">
 
@@ -1611,12 +1563,106 @@ document.getElementById('confirmYes').addEventListener('click', () => {
   closeConfirm();
 });
 
+/* ================= VICTORY FIREWORKS ================= */
+const fireworkLayer = document.getElementById('fireworkLayer');
+let fireworkTimers = [];
+
+function clearVictoryFireworks(){
+  fireworkTimers.forEach(timer => clearTimeout(timer));
+  fireworkTimers = [];
+
+  if(fireworkLayer){
+    fireworkLayer.innerHTML = '';
+  }
+}
+
+function createFirework(xPercent, yPercent, particleCount = 28){
+  if(!fireworkLayer) return;
+
+  const colors = [
+    '#FFC93C',
+    '#FFFFFF',
+    '#FF5A4F',
+    '#FFD700',
+    '#65D6FF',
+    '#FF8ED4'
+  ];
+
+  const centerX = fireworkLayer.clientWidth * xPercent;
+  const centerY = fireworkLayer.clientHeight * yPercent;
+  const burstColor = colors[Math.floor(Math.random() * colors.length)];
+
+  for(let i = 0; i < particleCount; i++){
+    const particle = document.createElement('span');
+    particle.className = 'firework-particle';
+
+    const angle = (Math.PI * 2 / particleCount) * i;
+    const distance = 70 + Math.random() * 95;
+
+    particle.style.left = `${centerX}px`;
+    particle.style.top = `${centerY}px`;
+    particle.style.background = Math.random() > 0.25
+      ? burstColor
+      : colors[Math.floor(Math.random() * colors.length)];
+
+    particle.style.setProperty('--fx', `${Math.cos(angle) * distance}px`);
+    particle.style.setProperty('--fy', `${Math.sin(angle) * distance}px`);
+    particle.style.animationDelay = `${Math.random() * 0.08}s`;
+
+    fireworkLayer.appendChild(particle);
+
+    const removeTimer = setTimeout(() => particle.remove(), 1550);
+    fireworkTimers.push(removeTimer);
+  }
+
+  // ประกายเล็กด้านใน ทำให้ดูเต็มเหมือนพลุเกม
+  for(let i = 0; i < 10; i++){
+    const sparkle = document.createElement('span');
+    sparkle.className = 'firework-particle sparkle';
+
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 35 + Math.random() * 65;
+
+    sparkle.style.left = `${centerX}px`;
+    sparkle.style.top = `${centerY}px`;
+    sparkle.style.background = '#FFFFFF';
+    sparkle.style.setProperty('--fx', `${Math.cos(angle) * distance}px`);
+    sparkle.style.setProperty('--fy', `${Math.sin(angle) * distance}px`);
+    sparkle.style.animationDelay = `${0.08 + Math.random() * 0.12}s`;
+
+    fireworkLayer.appendChild(sparkle);
+
+    const removeTimer = setTimeout(() => sparkle.remove(), 1750);
+    fireworkTimers.push(removeTimer);
+  }
+}
+
+function launchVictoryFireworks(){
+  clearVictoryFireworks();
+
+  const bursts = [
+    [0.22, 0.28, 0],
+    [0.78, 0.25, 260],
+    [0.50, 0.16, 520],
+    [0.18, 0.58, 820],
+    [0.82, 0.56, 1080],
+    [0.35, 0.38, 1380],
+    [0.68, 0.40, 1650],
+    [0.50, 0.70, 1950]
+  ];
+
+  bursts.forEach(([x, y, delay]) => {
+    const timer = setTimeout(() => createFirework(x, y), delay);
+    fireworkTimers.push(timer);
+  });
+}
+
 /* ================= END TRIP POPUP ================= */
 const endOverlay = document.getElementById('endOverlay');
 document.getElementById('endTripBtn').addEventListener('click', () => {
 
   endTripSound.currentTime = 0;
-  endTripSound.play();
+  endTripSound.play().catch(() => {});
   const doneCount = Object.values(state).filter(Boolean).length;
   document.getElementById('endSummaryText').textContent = `แก่งและสินไปเที่ยวครบ ${doneCount}/${totalPlaces} ไปเที่ยวด้วยกันหลายๆที่เลยนะ💗`;
   endOverlay.classList.add('show');
@@ -1624,6 +1670,7 @@ document.getElementById('endTripBtn').addEventListener('click', () => {
 });
 document.getElementById('endCloseBtn').addEventListener('click', () => {
   endOverlay.classList.remove('show');
+  clearVictoryFireworks();
 });
 
 /* ================= MEMORY TEMPLATE (4-square grid, IG story size) ================= */
