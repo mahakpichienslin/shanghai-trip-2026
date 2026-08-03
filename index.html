@@ -828,6 +828,44 @@ body{
   display:flex;
 }
 
+  #fireworkLayer{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  pointer-events:none;
+  z-index:1;
+}
+
+.firework-particle{
+  position:absolute;
+  width:8px;
+  height:8px;
+  background:var(--yellow);
+  box-shadow:0 0 8px currentColor;
+  opacity:0;
+  animation:fireworkBurst 1.1s ease-out forwards;
+}
+
+@keyframes fireworkBurst{
+  0%{
+    opacity:1;
+    transform:translate(0,0) scale(1);
+  }
+
+  100%{
+    opacity:0;
+    transform:
+      translate(var(--fx), var(--fy))
+      scale(0.4)
+      rotate(180deg);
+  }
+}
+
+.end-box{
+  position:relative;
+  z-index:2;
+}
+
 /* กล่องข้อความต้องอยู่เหนือพลุ */
 .end-box{
   position:relative;
@@ -1137,15 +1175,83 @@ body{
   </div>
 </div>
 
+const fireworkLayer = document.getElementById('fireworkLayer');
+
+function createFirework(x, y){
+  const colors = [
+    '#FFC93C',
+    '#FFFFFF',
+    '#FF5A4F',
+    '#FFD700',
+    '#65D6FF'
+  ];
+
+  const particleCount = 24;
+
+  for(let i = 0; i < particleCount; i++){
+    const particle = document.createElement('span');
+    particle.className = 'firework-particle';
+
+    const angle = (Math.PI * 2 / particleCount) * i;
+    const distance = 70 + Math.random() * 90;
+
+    particle.style.left = `${x}px`;
+    particle.style.top = `${y}px`;
+
+    particle.style.setProperty(
+      '--fx',
+      `${Math.cos(angle) * distance}px`
+    );
+
+    particle.style.setProperty(
+      '--fy',
+      `${Math.sin(angle) * distance}px`
+    );
+
+    particle.style.background =
+      colors[Math.floor(Math.random() * colors.length)];
+
+    fireworkLayer.appendChild(particle);
+
+    setTimeout(() => {
+      particle.remove();
+    }, 1200);
+  }
+}
+
+function launchVictoryFireworks(){
+  fireworkLayer.innerHTML = '';
+
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+
+  createFirework(width * 0.25, height * 0.30);
+
+  setTimeout(() => {
+    createFirework(width * 0.75, height * 0.26);
+  }, 300);
+
+  setTimeout(() => {
+    createFirework(width * 0.50, height * 0.18);
+  }, 600);
+
+  setTimeout(() => {
+    createFirework(width * 0.20, height * 0.58);
+  }, 900);
+
+  setTimeout(() => {
+    createFirework(width * 0.80, height * 0.55);
+  }, 1200);
+}
+  
 <!-- ============ END TRIP POPUP ============ -->
 <div id="endOverlay">
 
+  <div id="fireworkLayer"></div>
+
   <div class="pixel-box end-box">
     <div class="pixel-font-title">⭐️TRIP COMPLETE⭐️</div>
-
-    <p id="endSummaryText">
-      คุณไปเที่ยวครบ 0/0 สถานที่
-    </p>
+    <p id="endSummaryText">คุณไปเที่ยวครบ 0/0 สถานที่</p>
 
     <div class="end-actions">
       <button class="pixel-btn memory-btn" id="memoryBtn">
@@ -1156,8 +1262,8 @@ body{
         ปิด
       </button>
     </div>
-
   </div>
+
 </div>
 
 <!-- ============ MEMORY TEMPLATE POPUP ============ -->
@@ -1514,6 +1620,7 @@ document.getElementById('endTripBtn').addEventListener('click', () => {
   const doneCount = Object.values(state).filter(Boolean).length;
   document.getElementById('endSummaryText').textContent = `แก่งและสินไปเที่ยวครบ ${doneCount}/${totalPlaces} ไปเที่ยวด้วยกันหลายๆที่เลยนะ💗`;
   endOverlay.classList.add('show');
+  launchVictoryFireworks();
 });
 document.getElementById('endCloseBtn').addEventListener('click', () => {
   endOverlay.classList.remove('show');
