@@ -1308,6 +1308,135 @@ document.getElementById('memoryBtn').addEventListener('click', async () => {
   document.getElementById('memoryOverlay').classList.add('show');
 });
 
+
+/* ================= SHANGHAI WEATHER ================= */
+
+const SHANGHAI_WEATHER_URL =
+  "https://api.open-meteo.com/v1/forecast" +
+  "?latitude=31.2304" +
+  "&longitude=121.4737" +
+  "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day" +
+  "&temperature_unit=celsius" +
+  "&wind_speed_unit=kmh" +
+  "&timezone=Asia%2FShanghai";
+
+function getWeatherInfo(code, isDay){
+  const weatherMap = {
+    0:  { icon: isDay ? "☀️" : "🌙", text: "ท้องฟ้าแจ่มใส" },
+    1:  { icon: isDay ? "🌤️" : "🌙", text: "ท้องฟ้าโปร่ง" },
+    2:  { icon: "⛅", text: "มีเมฆบางส่วน" },
+    3:  { icon: "☁️", text: "เมฆมาก" },
+    45: { icon: "🌫️", text: "มีหมอก" },
+    48: { icon: "🌫️", text: "หมอกจัด" },
+    51: { icon: "🌦️", text: "ฝนปรอยเล็กน้อย" },
+    53: { icon: "🌦️", text: "ฝนปรอย" },
+    55: { icon: "🌧️", text: "ฝนปรอยหนัก" },
+    56: { icon: "🌧️", text: "ฝนเยือกแข็งเล็กน้อย" },
+    57: { icon: "🌧️", text: "ฝนเยือกแข็งหนัก" },
+    61: { icon: "🌦️", text: "ฝนตกเล็กน้อย" },
+    63: { icon: "🌧️", text: "ฝนตกปานกลาง" },
+    65: { icon: "🌧️", text: "ฝนตกหนัก" },
+    66: { icon: "🌧️", text: "ฝนเยือกแข็งเล็กน้อย" },
+    67: { icon: "🌧️", text: "ฝนเยือกแข็งหนัก" },
+    71: { icon: "🌨️", text: "หิมะตกเล็กน้อย" },
+    73: { icon: "🌨️", text: "หิมะตกปานกลาง" },
+    75: { icon: "❄️", text: "หิมะตกหนัก" },
+    77: { icon: "❄️", text: "เกล็ดหิมะ" },
+    80: { icon: "🌦️", text: "ฝนซู่เล็กน้อย" },
+    81: { icon: "🌧️", text: "ฝนซู่ปานกลาง" },
+    82: { icon: "⛈️", text: "ฝนซู่หนัก" },
+    85: { icon: "🌨️", text: "หิมะซู่เล็กน้อย" },
+    86: { icon: "❄️", text: "หิมะซู่หนัก" },
+    95: { icon: "⛈️", text: "พายุฝนฟ้าคะนอง" },
+    96: { icon: "⛈️", text: "พายุฝนและลูกเห็บ" },
+    99: { icon: "⛈️", text: "พายุรุนแรงและลูกเห็บ" }
+  };
+
+  return weatherMap[code] || {
+    icon: "🌡️",
+    text: "ไม่ทราบสภาพอากาศ"
+  };
+}
+
+async function loadShanghaiWeather(){
+  const iconEl = document.getElementById("weatherIcon");
+  const tempEl = document.getElementById("weatherTemp");
+  const descriptionEl = document.getElementById("weatherDescription");
+  const extraEl = document.getElementById("weatherExtra");
+  const updatedEl = document.getElementById("weatherUpdated");
+  const refreshBtn = document.getElementById("weatherRefreshBtn");
+
+  if (!iconEl || !tempEl || !descriptionEl || !extraEl) {
+    console.error("ไม่พบองค์ประกอบ Weather Card");
+    return;
+  }
+
+  iconEl.textContent = "⏳";
+  tempEl.textContent = "--°C";
+  descriptionEl.textContent = "กำลังโหลดสภาพอากาศ...";
+  extraEl.textContent = "ลม -- km/h";
+  updatedEl.textContent = "";
+
+  if (refreshBtn) refreshBtn.disabled = true;
+
+  try {
+    const response = await fetch(SHANGHAI_WEATHER_URL, {
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error(`Weather API HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    const current = data.current;
+
+    if (!current) {
+      throw new Error("ไม่พบข้อมูล current weather");
+    }
+
+    const weather = getWeatherInfo(
+      Number(current.weather_code),
+      Number(current.is_day) === 1
+    );
+
+    iconEl.textContent = weather.icon;
+    tempEl.textContent = `${Math.round(current.temperature_2m)}°C`;
+    descriptionEl.textContent =
+      `${weather.text} · รู้สึกเหมือน ${Math.round(current.apparent_temperature)}°C`;
+    extraEl.textContent =
+      `ลม ${Math.round(current.wind_speed_10m)} km/h`;
+
+    const updatedTime = new Intl.DateTimeFormat("th-TH", {
+      timeZone: "Asia/Shanghai",
+      hour: "2-digit",
+      minute: "2-digit"
+    }).format(new Date());
+
+    updatedEl.textContent = `อัปเดต ${updatedTime}`;
+  } catch (error) {
+    console.error("Weather error:", error);
+
+    iconEl.textContent = "⚠️";
+    tempEl.textContent = "--°C";
+    descriptionEl.textContent = "โหลดสภาพอากาศไม่สำเร็จ";
+    extraEl.textContent = "กด ↻ เพื่อลองใหม่";
+    updatedEl.textContent = "";
+  } finally {
+    if (refreshBtn) refreshBtn.disabled = false;
+  }
+}
+
+const weatherRefreshBtn = document.getElementById("weatherRefreshBtn");
+
+if (weatherRefreshBtn) {
+  weatherRefreshBtn.addEventListener("click", loadShanghaiWeather);
+}
+
+// โหลดข้อมูลทันทีเมื่อหน้าเว็บพร้อม
+loadShanghaiWeather();
+
+
 // ===== SOUND =====
 const bgm = new Audio("assets/sound/shanghai_theme.mp3");
 const startSound = new Audio("assets/sound/start.mp3");
@@ -1344,6 +1473,9 @@ document.getElementById('startBtn').addEventListener('click', () => {
     walkerGroup.classList.remove('active');
     document.getElementById('mainPage').style.display = 'block';
     window.scrollTo(0, 0);
+
+    // อัปเดตสภาพอากาศอีกครั้งเมื่อเข้าสู่หน้าหลัก
+    loadShanghaiWeather();
   }, 1450);
 
 });
