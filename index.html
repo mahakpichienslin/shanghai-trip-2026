@@ -783,13 +783,13 @@ const itinerary = [
     day: 4,
     title: "DAY 4 — MUSEUM DAY",
     places: [
-      { name: "1000 Trees ⭐⭐⭐⭐⭐", lat: 31.2453, lng: 121.4562 },
-      { name: "Natural History Museum ⭐⭐⭐⭐☆", lat: 31.2389, lng: 121.4489 },
-      { name: "1933 Old Millfun ⭐⭐⭐⭐☆", lat: 31.2662, lng: 121.4834 },
-      { name: "China Art Museum ⭐⭐⭐⭐☆", lat: 31.1913, lng: 121.5062 },
-      { name: "Space & Time Cube ⭐⭐⭐☆☆", lat: 31.2532, lng: 121.4941 },
-      { name: "Huaihai Road (เย็น)", lat: 31.2185, lng: 121.4644 },
-      { name: "West Nanjing Road (เย็น)", lat: 31.2258, lng: 121.4487 },
+      { name: "1000 Trees", lat: 31.2453, lng: 121.4562 },
+      { name: "Natural History Museum", lat: 31.2389, lng: 121.4489 },
+      { name: "1933 Old Millfun", lat: 31.2662, lng: 121.4834 },
+      { name: "China Art Museum", lat: 31.1913, lng: 121.5062 },
+      { name: "Space & Time Cube", lat: 31.2532, lng: 121.4941 },
+      { name: "Huaihai Road", lat: 31.2185, lng: 121.4644 },
+      { name: "West Nanjing Road", lat: 31.2258, lng: 121.4487 },
       { name: "Street Food", lat: 31.2258, lng: 121.4487 }
     ]
   },
@@ -996,7 +996,7 @@ const mctx = memoryCanvas.getContext('2d');
 const CW = memoryCanvas.width;   // 1080 - IG story width
 const CH = memoryCanvas.height;  // 1920 - IG story height
 
-const GRID = { x: 210, y: 340, size: 660, gap: 20 };
+const GRID = { x: 80, y: 320, size: 920, gap: 20 };
 function cellRect(i){
   const col = i % 2, row = Math.floor(i/2);
   const cell = (GRID.size - GRID.gap) / 2;
@@ -1020,13 +1020,27 @@ function drawCover(ctx, img, dx, dy, dw, dh){
   ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
-function drawContain(ctx, img, dx, dy, dw, dh, alignBottom){
-  const srcRatio = img.width / img.height;
-  let w = dw, h = dw / srcRatio;
-  if(h > dh){ h = dh; w = dh * srcRatio; }
-  const x = dx + (dw - w)/2;
-  const y = alignBottom ? dy + (dh - h) : dy + (dh - h)/2;
-  ctx.drawImage(img, x, y, w, h);
+function drawContain(ctx, img, dx, dy, dw, dh, alignBottom, flip = false){
+    const srcRatio = img.width / img.height;
+    let w = dw, h = dw / srcRatio;
+    if(h > dh){
+        h = dh;
+        w = dh * srcRatio;
+    }
+
+    const x = dx + (dw - w) / 2;
+    const y = alignBottom ? dy + (dh - h) : dy + (dh - h) / 2;
+
+    ctx.save();
+
+    if(flip){
+        ctx.scale(-1,1);
+        ctx.drawImage(img, -x - w, y, w, h);
+    }else{
+        ctx.drawImage(img, x, y, w, h);
+    }
+
+    ctx.restore();
 }
 
 function drawPixelText(ctx, text, x, y, size, fill){
@@ -1065,8 +1079,8 @@ function drawMemoryCanvas(){
   drawPixelText(mctx, '2 0 2 6', CW/2, 212, 40, '#FFFFFF');
 
   // side characters
-  drawContain(mctx, leftImg, 10, 300, 190, 1380, true);
-  drawContain(mctx, rightImg, CW-200, 300, 190, 1380, true);
+  drawContain(mctx, leftImg, -20, 220, 320, 1650, true);
+drawContain(mctx, rightImg, CW-300, 220, 320, 1650, true);
 
   // 2x2 photo grid
   for(let i=0;i<4;i++){
