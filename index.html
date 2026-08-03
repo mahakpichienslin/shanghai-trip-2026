@@ -895,8 +895,8 @@ const successStage = document.getElementById('successStage');
 function showSuccessPopup(){
 
   // เล่นเสียง
-  successSound.currentTime = 0;
-  successSound.play();
+ successSound.currentTime = 0;
+successSound.play().catch(() => {});
   // clear old stars
   successStage.querySelectorAll('.star').forEach(s => s.remove());
   const starChars = ['★','✦','✧','✩'];
@@ -1228,10 +1228,11 @@ successSound.volume = 0.8;
 document.getElementById('startBtn').addEventListener('click', () => {
 
   // เล่นเสียงกดปุ่ม
-  startSound.play();
+  startSound.currentTime = 0;
+  startSound.play().catch(() => {});
 
   // เริ่มเพลงพื้นหลัง
-  bgm.play().catch(()=>{});
+  bgm.play().catch(() => {});
 
   const splash = document.getElementById('splash');
   const walkerGroup = document.getElementById('walkerGroup');
@@ -1242,14 +1243,13 @@ document.getElementById('startBtn').addEventListener('click', () => {
     splash.classList.add('fading');
   }, 550);
 
-});
-
   setTimeout(() => {
     splash.style.display = 'none';
     walkerGroup.classList.remove('active');
     document.getElementById('mainPage').style.display = 'block';
-    window.scrollTo(0,0);
+    window.scrollTo(0, 0);
   }, 1450);
+
 });
 
 render();
