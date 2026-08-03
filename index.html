@@ -2085,7 +2085,38 @@ successSound.volume = 0.8;
 endTripSound.volume = 0.8;
 
 // จำว่าเพลงเคยเริ่มเล่นแล้วหรือยัง
-let bgmStarted = false;
+let bgmStarted = false; 
+  const musicBtn = document.getElementById("musicBtn");
+
+let musicEnabled = localStorage.getItem("musicEnabled");
+
+if (musicEnabled === null) {
+    musicEnabled = "true";
+}
+
+musicBtn.textContent = musicEnabled === "true" ? "🔊" : "🔇";
+
+musicBtn.addEventListener("click", () => {
+
+    if (musicEnabled === "true") {
+
+        musicEnabled = "false";
+        bgm.pause();
+        musicBtn.textContent = "🔇";
+
+    } else {
+
+        musicEnabled = "true";
+
+        if (bgmStarted) {
+            bgm.play().catch(() => {});
+        }
+
+        musicBtn.textContent = "🔊";
+    }
+
+    localStorage.setItem("musicEnabled", musicEnabled);
+});
 
 function pauseBgm() {
   if (bgmStarted) {
@@ -2094,9 +2125,9 @@ function pauseBgm() {
 }
 
 function resumeBgm() {
-  if (bgmStarted) {
-    bgm.play().catch(() => {});
-  }
+    if (bgmStarted && musicEnabled === "true") {
+        bgm.play().catch(() => {});
+    }
 }
 
 // เมื่อสลับแท็บหรือยุบหน้า
@@ -2122,7 +2153,10 @@ document.getElementById("startBtn").addEventListener("click", () => {
   startSound.play().catch(() => {});
 
   bgmStarted = true;
-  bgm.play().catch(() => {});
+
+if (musicEnabled === "true") {
+    bgm.play().catch(() => {});
+}
 
   const splash = document.getElementById("splash");
   const walkerGroup = document.getElementById("walkerGroup");
