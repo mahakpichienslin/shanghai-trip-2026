@@ -955,6 +955,9 @@ document.getElementById('confirmYes').addEventListener('click', () => {
 /* ================= END TRIP POPUP ================= */
 const endOverlay = document.getElementById('endOverlay');
 document.getElementById('endTripBtn').addEventListener('click', () => {
+
+  endTripSound.currentTime = 0;
+  endTripSound.play();
   const doneCount = Object.values(state).filter(Boolean).length;
   document.getElementById('endSummaryText').textContent = `แก่งและสินไปเที่ยวครบ ${doneCount}/${totalPlaces} ไปเที่ยวด้วยกันหลายๆที่เลยนะ💗`;
   endOverlay.classList.add('show');
@@ -1217,9 +1220,10 @@ document.getElementById('memoryBtn').addEventListener('click', async () => {
 const bgm = new Audio("assets/sound/shanghai_theme.mp3");
 const startSound = new Audio("assets/sound/start.mp3");
 const successSound = new Audio("assets/sound/success.mp3");
+const endTripSound = new Audio("assets/sound/end-trip.mp3");
 
 bgm.loop = true;
-bgm.volume = 0.35;
+bgm.volume = 0.25;
 
 startSound.volume = 0.8;
 successSound.volume = 0.8;
