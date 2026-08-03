@@ -1502,7 +1502,6 @@ if (weatherRefreshBtn) {
 // โหลดข้อมูลทันทีเมื่อหน้าเว็บพร้อม
 loadShanghaiWeather();
 
-
 // ===== SOUND =====
 const bgm = new Audio("assets/sound/shanghai_theme.mp3");
 const startSound = new Audio("assets/sound/start.mp3");
@@ -1514,36 +1513,65 @@ bgm.volume = 0.15;
 
 startSound.volume = 0.8;
 successSound.volume = 0.8;
-  
-/* ================= SPLASH -> MAIN TRANSITION ================= */
-document.getElementById('startBtn').addEventListener('click', () => {
+endTripSound.volume = 0.8;
 
-  // เล่นเสียงกดปุ่ม
+// จำว่าเพลงเคยเริ่มเล่นแล้วหรือยัง
+let bgmStarted = false;
+
+function pauseBgm() {
+  if (bgmStarted) {
+    bgm.pause();
+  }
+}
+
+function resumeBgm() {
+  if (bgmStarted) {
+    bgm.play().catch(() => {});
+  }
+}
+
+// เมื่อสลับแท็บหรือยุบหน้า
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    pauseBgm();
+  } else {
+    resumeBgm();
+  }
+});
+
+// iPhone / iPad Safari และ PWA
+window.addEventListener("pagehide", pauseBgm);
+window.addEventListener("pageshow", resumeBgm);
+
+// บางเบราว์เซอร์ Android
+window.addEventListener("blur", pauseBgm);
+window.addEventListener("focus", resumeBgm);
+
+/* ================= SPLASH -> MAIN TRANSITION ================= */
+document.getElementById("startBtn").addEventListener("click", () => {
   startSound.currentTime = 0;
   startSound.play().catch(() => {});
 
-  // เริ่มเพลงพื้นหลัง
+  bgmStarted = true;
   bgm.play().catch(() => {});
 
-  const splash = document.getElementById('splash');
-  const walkerGroup = document.getElementById('walkerGroup');
+  const splash = document.getElementById("splash");
+  const walkerGroup = document.getElementById("walkerGroup");
 
-  walkerGroup.classList.add('active');
+  walkerGroup.classList.add("active");
 
   setTimeout(() => {
-    splash.classList.add('fading');
+    splash.classList.add("fading");
   }, 550);
 
   setTimeout(() => {
-    splash.style.display = 'none';
-    walkerGroup.classList.remove('active');
-    document.getElementById('mainPage').style.display = 'block';
+    splash.style.display = "none";
+    walkerGroup.classList.remove("active");
+    document.getElementById("mainPage").style.display = "block";
     window.scrollTo(0, 0);
 
-    // อัปเดตสภาพอากาศอีกครั้งเมื่อเข้าสู่หน้าหลัก
     loadShanghaiWeather();
   }, 1450);
-
 });
 
 loadState();
