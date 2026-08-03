@@ -893,6 +893,10 @@ const successOverlay = document.getElementById('successOverlay');
 const successStage = document.getElementById('successStage');
 
 function showSuccessPopup(){
+
+  // เล่นเสียง
+  successSound.currentTime = 0;
+  successSound.play();
   // clear old stars
   successStage.querySelectorAll('.star').forEach(s => s.remove());
   const starChars = ['★','✦','✧','✩'];
@@ -1209,15 +1213,36 @@ document.getElementById('memoryBtn').addEventListener('click', async () => {
   document.getElementById('memoryOverlay').classList.add('show');
 });
 
+// ===== SOUND =====
+const bgm = new Audio("assets/sound/shanghai_theme.mp3");
+const startSound = new Audio("assets/sound/start.mp3");
+const successSound = new Audio("assets/sound/success.mp3");
+
+bgm.loop = true;
+bgm.volume = 0.35;
+
+startSound.volume = 0.8;
+successSound.volume = 0.8;
+  
 /* ================= SPLASH -> MAIN TRANSITION ================= */
 document.getElementById('startBtn').addEventListener('click', () => {
+
+  // เล่นเสียงกดปุ่ม
+  startSound.play();
+
+  // เริ่มเพลงพื้นหลัง
+  bgm.play().catch(()=>{});
+
   const splash = document.getElementById('splash');
   const walkerGroup = document.getElementById('walkerGroup');
+
   walkerGroup.classList.add('active');
 
   setTimeout(() => {
     splash.classList.add('fading');
   }, 550);
+
+});
 
   setTimeout(() => {
     splash.style.display = 'none';
