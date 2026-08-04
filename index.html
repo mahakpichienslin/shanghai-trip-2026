@@ -986,6 +986,150 @@ body{
   .flight-route{ font-size:18px; }
   .place-main{ font-size:18px; }
 }
+
+/* ================= EDITABLE TRIP PLAN ================= */
+.day-header{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.day-header-title{
+  flex:1;
+  min-width:0;
+  line-height:1.5;
+}
+.add-place-btn{
+  width:36px;
+  height:36px;
+  flex-shrink:0;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  background:var(--yellow);
+  color:var(--ink);
+}
+.place-edit-actions{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.mini-edit-btn,
+.mini-delete-btn{
+  width:32px;
+  height:32px;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'VT323',monospace;
+  font-size:16px;
+}
+.mini-edit-btn{ background:var(--yellow); }
+.mini-delete-btn{
+  background:var(--red);
+  color:var(--white);
+}
+.add-day-wrap{
+  display:flex;
+  justify-content:center;
+  margin:4px 0 26px;
+}
+.add-day-btn{
+  font-family:'Press Start 2P',cursive;
+  font-size:11px;
+  background:var(--yellow);
+  color:var(--ink);
+  border:4px solid var(--ink);
+  border-radius:0;
+  padding:12px 18px;
+  box-shadow:4px 4px 0 var(--pixel-shadow);
+  cursor:pointer;
+}
+.add-day-btn:active{
+  transform:translate(4px,4px);
+  box-shadow:none;
+}
+.delete-day-btn{
+  margin-right:auto;
+  background:var(--red);
+  color:var(--white);
+  font-size:9px !important;
+}
+.empty-day{
+  padding:16px 8px;
+  text-align:center;
+  font-size:18px;
+  color:#795f35;
+}
+.editor-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.68);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:150;
+  padding:16px;
+}
+.editor-overlay.show{ display:flex; }
+.editor-box{
+  width:min(92vw,460px);
+  max-height:88vh;
+  overflow:auto;
+  padding:22px 18px;
+}
+.editor-title{
+  font-family:'Press Start 2P',cursive;
+  color:var(--red-dark);
+  font-size:14px;
+  line-height:1.5;
+  text-align:center;
+  margin-bottom:18px;
+}
+.editor-field{
+  display:block;
+  margin-bottom:14px;
+  font-size:19px;
+  color:var(--ink);
+}
+.editor-input{
+  width:100%;
+  margin-top:6px;
+  padding:11px 12px;
+  border:3px solid var(--ink);
+  background:var(--cream);
+  color:var(--ink);
+  font-family:'VT323',monospace;
+  font-size:20px;
+  outline:none;
+}
+.editor-input:focus{
+  border-color:var(--red);
+}
+.editor-help{
+  font-size:16px;
+  line-height:1.35;
+  color:#795f35;
+  margin:-4px 0 14px;
+}
+.editor-actions{
+  display:flex;
+  gap:10px;
+}
+.editor-actions .pixel-btn{
+  flex:1;
+  font-size:10px;
+  padding:11px 8px;
+}
+.editor-cancel{ background:var(--cream); }
+.editor-save{
+  background:var(--red);
+  color:var(--white);
+}
+
 </style>
 </head>
 <body>
@@ -1094,6 +1238,10 @@ body{
     </div>
 
     <div id="daysContainer"></div>
+
+    <div class="add-day-wrap">
+      <button id="addDayBtn" class="add-day-btn" type="button">＋ ADD DAY</button>
+    </div>
   </div>
 
   <button class="pixel-btn end-btn pixel-font" id="endTripBtn">🏁 END TRIP</button>
@@ -1204,6 +1352,57 @@ body{
   </div>
 </div>
 
+
+<!-- ============ ADD / EDIT PLACE POPUP ============ -->
+<div id="placeEditorOverlay" class="editor-overlay">
+  <div class="pixel-box editor-box">
+    <div class="editor-title" id="placeEditorTitle">ADD PLACE</div>
+
+    <label class="editor-field">
+      ชื่อสถานที่
+      <input id="placeNameInput" class="editor-input" type="text" maxlength="160"
+             placeholder="เช่น Shanghai Museum">
+    </label>
+
+    <label class="editor-field">
+      พิกัดหรือลิงก์แผนที่
+      <input id="placeMapInput" class="editor-input" type="text" maxlength="500"
+             placeholder="31.2304, 121.4737 หรือ https://...">
+    </label>
+
+    <div class="editor-help">
+      ใส่ได้ทั้งพิกัด เช่น 31.2304, 121.4737 หรือลิงก์ Google Maps / Apple Maps
+    </div>
+
+    <div class="editor-actions">
+      <button id="placeCancelBtn" class="pixel-btn editor-cancel" type="button">CANCEL</button>
+      <button id="placeSaveBtn" class="pixel-btn editor-save" type="button">SAVE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ADD DAY POPUP ============ -->
+<div id="dayEditorOverlay" class="editor-overlay">
+  <div class="pixel-box editor-box">
+    <div class="editor-title" id="dayEditorTitle">ADD DAY</div>
+
+    <label class="editor-field">
+      ชื่อแพลนของวันนี้
+      <input id="dayTitleInput" class="editor-input" type="text" maxlength="160"
+             placeholder="เช่น DAY 6 — FREE DAY">
+    </label>
+
+    <div class="editor-help">
+      ระบบจะสร้าง Day ถัดไปและบันทึกข้อมูลไว้ในเครื่องนี้
+    </div>
+
+    <div class="editor-actions">
+      <button id="dayCancelBtn" class="pixel-btn editor-cancel" type="button">CANCEL</button>
+      <button id="daySaveBtn" class="pixel-btn editor-save" type="button">ADD DAY</button>
+    </div>
+  </div>
+</div>
+
 <!-- ============ CONFIRM RESET POPUP ============ -->
 <div id="confirmOverlay">
   <div class="pixel-box confirm-box">
@@ -1256,7 +1455,7 @@ body{
 
 <script>
 /* ================= DATA ================= */
-const itinerary = [
+const DEFAULT_ITINERARY = [
   {
     day: 1,
     title: "DAY 1 — แลนด์มาร์กเซี่ยงไฮ้",
@@ -1316,48 +1515,152 @@ const itinerary = [
   }
 ];
 
-/* state: key "d{day}-p{index}" -> true if done */
-const state = {};
-let totalPlaces = 0;
-itinerary.forEach(d => totalPlaces += d.places.length);
+const STATE_STORAGE_KEY = 'shanghaiTrip2026State';
+const PLAN_STORAGE_KEY = 'shanghaiTrip2026EditablePlanV1';
 
+function makeId(prefix='id'){
+  if(window.crypto && typeof crypto.randomUUID === 'function'){
+    return `${prefix}-${crypto.randomUUID()}`;
+  }
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function cloneDefaultPlan(){
+  return JSON.parse(JSON.stringify(DEFAULT_ITINERARY));
+}
+
+function normalizePlan(plan){
+  return plan.map((day, dayIndex) => ({
+    day: dayIndex + 1,
+    title: String(day.title || `DAY ${dayIndex + 1}`),
+    places: Array.isArray(day.places) ? day.places.map(place => ({
+      id: place.id || makeId('place'),
+      name: String(place.name || 'สถานที่ใหม่'),
+      map: place.map || (
+        Number.isFinite(Number(place.lat)) && Number.isFinite(Number(place.lng))
+          ? `${place.lat}, ${place.lng}`
+          : ''
+      )
+    })) : []
+  }));
+}
+
+function loadTripPlan(){
+  const saved = localStorage.getItem(PLAN_STORAGE_KEY);
+  if(saved){
+    try{
+      const parsed = JSON.parse(saved);
+      if(Array.isArray(parsed)) return normalizePlan(parsed);
+    }catch(error){
+      console.error('โหลดแพลนไม่สำเร็จ:', error);
+    }
+  }
+  return normalizePlan(cloneDefaultPlan());
+}
+
+let itinerary = loadTripPlan();
+const state = {};
 let pendingResetKey = null;
+let editingDayNumber = null;
+let editingPlaceId = null;
+
+function saveTripPlan(){
+  localStorage.setItem(PLAN_STORAGE_KEY, JSON.stringify(itinerary));
+}
+
+function saveState(){
+  localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadState(){
+  const saved = localStorage.getItem(STATE_STORAGE_KEY);
+  if(!saved) return;
+
+  try{
+    const savedState = JSON.parse(saved);
+
+    // รองรับ Progress เวอร์ชันเดิมที่ใช้ d1-p0
+    itinerary.forEach(day => {
+      day.places.forEach((place, index) => {
+        const oldKey = `d${day.day}-p${index}`;
+        if(savedState[place.id] || savedState[oldKey]){
+          state[place.id] = true;
+        }
+      });
+    });
+  }catch(error){
+    console.error('โหลดข้อมูล Progress ไม่สำเร็จ:', error);
+  }
+}
+
+function totalPlacesCount(){
+  return itinerary.reduce((sum, day) => sum + day.places.length, 0);
+}
+
+function mapUrl(mapValue){
+  const value = String(mapValue || '').trim();
+  if(!value) return '';
+
+  if(/^https?:\/\//i.test(value)) return value;
+
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(value)}`;
+}
 
 /* ================= RENDER ================= */
 const daysContainer = document.getElementById('daysContainer');
 
-function mapUrl(lat, lng){
-  return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-}
-
 function render(){
   daysContainer.innerHTML = '';
+
   itinerary.forEach(day => {
     const dayEl = document.createElement('div');
     dayEl.className = 'pixel-box day-card';
 
     const header = document.createElement('div');
     header.className = 'day-header pixel-font';
-    header.textContent = day.title;
+    header.innerHTML = `
+      <span class="day-header-title">${escapeHtml(day.title)}</span>
+      <button class="pixel-btn add-place-btn" type="button"
+              data-role="addPlaceBtn" data-day="${day.day}" aria-label="เพิ่มสถานที่">＋</button>
+    `;
     dayEl.appendChild(header);
 
-    day.places.forEach((place, idx) => {
-      const key = `d${day.day}-p${idx}`;
+    if(day.places.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'empty-day';
+      empty.textContent = 'ยังไม่มีสถานที่ กด + เพื่อเพิ่ม';
+      dayEl.appendChild(empty);
+    }
+
+    day.places.forEach(place => {
       const row = document.createElement('div');
       row.className = 'place-row';
-
-      const isDone = !!state[key];
+      const isDone = !!state[place.id];
+      const href = mapUrl(place.map);
 
       row.innerHTML = `
         <div class="place-main">
-          <span class="place-name">${place.name}</span>
+          <span class="place-name">${escapeHtml(place.name)}</span>
           <span class="tick">${isDone ? '☑' : ''}</span>
         </div>
+
         <div class="place-actions">
-          <a class="map-link" href="${mapUrl(place.lat, place.lng)}" target="_blank" rel="noopener">📍 ดูแผนที่</a>
-          <button class="pixel-btn ${isDone ? 'done' : ''}" data-key="${key}" data-role="successBtn" ${isDone ? 'disabled' : ''}>
-            ${isDone ? '✔ DONE' : 'SUCCESSFUL'}
-          </button>
+          ${href ? `<a class="map-link" href="${escapeAttribute(href)}" target="_blank" rel="noopener">📍 ดูแผนที่</a>` : ''}
+
+          <div class="place-edit-actions">
+            <button class="pixel-btn mini-edit-btn" type="button"
+                    data-role="editPlaceBtn" data-day="${day.day}" data-place-id="${place.id}"
+                    aria-label="แก้ไขสถานที่">✏️</button>
+
+            <button class="pixel-btn mini-delete-btn" type="button"
+                    data-role="deletePlaceBtn" data-day="${day.day}" data-place-id="${place.id}"
+                    aria-label="ลบสถานที่">🗑</button>
+
+            <button class="pixel-btn ${isDone ? 'done' : ''}" type="button"
+                    data-key="${place.id}" data-role="successBtn" ${isDone ? 'disabled' : ''}>
+              ${isDone ? '✔ DONE' : 'SUCCESSFUL'}
+            </button>
+          </div>
         </div>
       `;
       dayEl.appendChild(row);
@@ -1365,9 +1668,16 @@ function render(){
 
     const resetRow = document.createElement('div');
     resetRow.className = 'reset-row';
-    resetRow.innerHTML = `<button class="pixel-btn reset-btn" data-day="${day.day}" data-role="resetBtn">↺ RESET DAY ${day.day}</button>`;
+    resetRow.innerHTML = `
+      ${day.day > DEFAULT_ITINERARY.length
+        ? `<button class="pixel-btn delete-day-btn" type="button"
+                   data-role="deleteDayBtn" data-day="${day.day}">🗑 DELETE DAY ${day.day}</button>`
+        : ''
+      }
+      <button class="pixel-btn reset-btn" type="button"
+              data-day="${day.day}" data-role="resetBtn">↺ RESET DAY ${day.day}</button>
+    `;
     dayEl.appendChild(resetRow);
-
     daysContainer.appendChild(dayEl);
   });
 
@@ -1375,62 +1685,240 @@ function render(){
   attachRowListeners();
 }
 
+function escapeHtml(value){
+  return String(value)
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'",'&#039;');
+}
+
+function escapeAttribute(value){
+  return escapeHtml(value);
+}
+
 function updateProgress(){
-  const doneCount = Object.values(state).filter(Boolean).length;
-  document.getElementById('progressLabel').textContent = `${doneCount} / ${totalPlaces} SPOTS DONE`;
-  const pct = totalPlaces ? (doneCount/totalPlaces*100) : 0;
+  const doneCount = itinerary.reduce(
+    (sum, day) => sum + day.places.filter(place => state[place.id]).length,
+    0
+  );
+  const totalPlaces = totalPlacesCount();
+
+  document.getElementById('progressLabel').textContent =
+    `${doneCount} / ${totalPlaces} SPOTS DONE`;
+
+  const pct = totalPlaces ? (doneCount / totalPlaces * 100) : 0;
   document.getElementById('progressBar').style.width = pct + '%';
 }
 
-const STORAGE_KEY = 'shanghaiTrip2026State';
-
-function saveState(){
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(state)
-  );
-}
-
-function loadState(){
-  const saved = localStorage.getItem(STORAGE_KEY);
-
-  if (!saved) return;
-
-  try {
-    const savedState = JSON.parse(saved);
-    Object.assign(state, savedState);
-  } catch (error) {
-    console.error('โหลดข้อมูลไม่สำเร็จ:', error);
-  }
-}
-  
 function attachRowListeners(){
   document.querySelectorAll('[data-role="successBtn"]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const key = btn.getAttribute('data-key');
-
+      const key = btn.dataset.key;
       if(state[key]) return;
 
       state[key] = true;
-
-      // บันทึก Progress
       saveState();
-
-      // แสดงรูปและเล่นเสียงก่อน
       showSuccessPopup();
-
-      // เปลี่ยนปุ่มเป็น DONE และอัปเดต Progress
       render();
     });
   });
 
   document.querySelectorAll('[data-role="resetBtn"]').forEach(btn => {
     btn.addEventListener('click', () => {
-      pendingResetKey = btn.getAttribute('data-day');
+      pendingResetKey = Number(btn.dataset.day);
       openConfirm();
     });
   });
+
+  document.querySelectorAll('[data-role="addPlaceBtn"]').forEach(btn => {
+    btn.addEventListener('click', () => openPlaceEditor(Number(btn.dataset.day)));
+  });
+
+  document.querySelectorAll('[data-role="editPlaceBtn"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      openPlaceEditor(Number(btn.dataset.day), btn.dataset.placeId);
+    });
+  });
+
+  document.querySelectorAll('[data-role="deletePlaceBtn"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      deletePlace(Number(btn.dataset.day), btn.dataset.placeId);
+    });
+  });
+
+  document.querySelectorAll('[data-role="deleteDayBtn"]').forEach(btn => {
+    btn.addEventListener('click', () => deleteDay(Number(btn.dataset.day)));
+  });
 }
+
+/* ================= PLACE EDITOR ================= */
+const placeEditorOverlay = document.getElementById('placeEditorOverlay');
+const placeNameInput = document.getElementById('placeNameInput');
+const placeMapInput = document.getElementById('placeMapInput');
+
+function openPlaceEditor(dayNumber, placeId=null){
+  editingDayNumber = Number(dayNumber);
+  editingPlaceId = placeId;
+
+  const day = itinerary.find(item => item.day === editingDayNumber);
+  const place = placeId && day
+    ? day.places.find(item => item.id === placeId)
+    : null;
+
+  document.getElementById('placeEditorTitle').textContent =
+    place ? 'EDIT PLACE' : `ADD PLACE · DAY ${editingDayNumber}`;
+
+  placeNameInput.value = place ? place.name : '';
+  placeMapInput.value = place ? place.map : '';
+
+  placeEditorOverlay.classList.add('show');
+  setTimeout(() => placeNameInput.focus(), 100);
+}
+
+function closePlaceEditor(){
+  placeEditorOverlay.classList.remove('show');
+  editingDayNumber = null;
+  editingPlaceId = null;
+}
+
+function savePlaceFromEditor(){
+  const name = placeNameInput.value.trim();
+  const map = placeMapInput.value.trim();
+
+  if(!name){
+    alert('กรุณาใส่ชื่อสถานที่');
+    placeNameInput.focus();
+    return;
+  }
+
+  const day = itinerary.find(item => item.day === editingDayNumber);
+  if(!day){
+    alert('ไม่พบ Day ที่ต้องการ');
+    return;
+  }
+
+  if(editingPlaceId){
+    const place = day.places.find(item => item.id === editingPlaceId);
+    if(place){
+      place.name = name;
+      place.map = map;
+    }
+  }else{
+    day.places.push({
+      id: makeId('place'),
+      name,
+      map
+    });
+  }
+
+  saveTripPlan();
+  render();
+  closePlaceEditor();
+}
+
+function deletePlace(dayNumber, placeId){
+  const day = itinerary.find(item => item.day === dayNumber);
+  if(!day) return;
+
+  const place = day.places.find(item => item.id === placeId);
+  if(!place) return;
+
+  if(!confirm(`ลบ "${place.name}" ใช่ไหม?`)) return;
+
+  day.places = day.places.filter(item => item.id !== placeId);
+  delete state[placeId];
+
+  saveTripPlan();
+  saveState();
+  render();
+}
+
+document.getElementById('placeCancelBtn').addEventListener('click', closePlaceEditor);
+document.getElementById('placeSaveBtn').addEventListener('click', savePlaceFromEditor);
+placeEditorOverlay.addEventListener('click', event => {
+  if(event.target === placeEditorOverlay) closePlaceEditor();
+});
+placeNameInput.addEventListener('keydown', event => {
+  if(event.key === 'Enter') savePlaceFromEditor();
+});
+
+/* ================= DAY EDITOR ================= */
+const dayEditorOverlay = document.getElementById('dayEditorOverlay');
+const dayTitleInput = document.getElementById('dayTitleInput');
+
+function openDayEditor(){
+  const nextDay = itinerary.length + 1;
+  document.getElementById('dayEditorTitle').textContent = `ADD DAY ${nextDay}`;
+  dayTitleInput.value = `DAY ${nextDay} — `;
+  dayEditorOverlay.classList.add('show');
+
+  setTimeout(() => {
+    dayTitleInput.focus();
+    dayTitleInput.setSelectionRange(dayTitleInput.value.length, dayTitleInput.value.length);
+  }, 100);
+}
+
+function closeDayEditor(){
+  dayEditorOverlay.classList.remove('show');
+}
+
+function saveDayFromEditor(){
+  const title = dayTitleInput.value.trim();
+  if(!title){
+    alert('กรุณาใส่ชื่อแพลนของวันนี้');
+    dayTitleInput.focus();
+    return;
+  }
+
+  itinerary.push({
+    day: itinerary.length + 1,
+    title,
+    places: []
+  });
+
+  saveTripPlan();
+  render();
+  closeDayEditor();
+
+  setTimeout(() => {
+    const cards = daysContainer.querySelectorAll('.day-card');
+    const newest = cards[cards.length - 1];
+    if(newest) newest.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 100);
+}
+
+function deleteDay(dayNumber){
+  const day = itinerary.find(item => item.day === dayNumber);
+  if(!day) return;
+
+  if(!confirm(`ลบ ${day.title} ใช่ไหม?`)) return;
+
+  day.places.forEach(place => delete state[place.id]);
+  itinerary = itinerary.filter(item => item.day !== dayNumber);
+
+  itinerary.forEach((item, index) => {
+    item.day = index + 1;
+    if(/^DAY\s+\d+\s+—/i.test(item.title)){
+      item.title = item.title.replace(/^DAY\s+\d+/i, `DAY ${item.day}`);
+    }
+  });
+
+  saveTripPlan();
+  saveState();
+  render();
+}
+
+document.getElementById('addDayBtn').addEventListener('click', openDayEditor);
+document.getElementById('dayCancelBtn').addEventListener('click', closeDayEditor);
+document.getElementById('daySaveBtn').addEventListener('click', saveDayFromEditor);
+dayEditorOverlay.addEventListener('click', event => {
+  if(event.target === dayEditorOverlay) closeDayEditor();
+});
+dayTitleInput.addEventListener('keydown', event => {
+  if(event.key === 'Enter') saveDayFromEditor();
+});
 
 /* ================= SUCCESS POPUP ================= */
 const successOverlay = document.getElementById('successOverlay');
@@ -1574,9 +2062,12 @@ function closeConfirm(){
 document.getElementById('confirmNo').addEventListener('click', closeConfirm);
 document.getElementById('confirmYes').addEventListener('click', () => {
   if(pendingResetKey){
-    Object.keys(state).forEach(k => {
-      if(k.startsWith(`d${pendingResetKey}-`)) state[k] = false;
-    });
+    const day = itinerary.find(item => item.day === Number(pendingResetKey));
+    if(day){
+      day.places.forEach(place => {
+        state[place.id] = false;
+      });
+    }
     saveState();
     render();
   }
@@ -1683,8 +2174,15 @@ document.getElementById('endTripBtn').addEventListener('click', () => {
 
   endTripSound.currentTime = 0;
   endTripSound.play().catch(() => {});
-  const doneCount = Object.values(state).filter(Boolean).length;
-  document.getElementById('endSummaryText').textContent = `แก่งและสินไปเที่ยวครบ ${doneCount}/${totalPlaces} ไปเที่ยวด้วยกันหลายๆที่เลยนะ💗`;
+  const doneCount = itinerary.reduce(
+    (sum, day) => sum + day.places.filter(place => state[place.id]).length,
+    0
+  );
+  const totalPlaces = totalPlacesCount();
+
+  document.getElementById('endSummaryText').textContent =
+    `แก่งและสินไปเที่ยวครบ ${doneCount}/${totalPlaces} ไปเที่ยวด้วยกันหลายๆที่เลยนะ💗`;
+
   endOverlay.classList.add('show');
   launchVictoryFireworks();
 });
