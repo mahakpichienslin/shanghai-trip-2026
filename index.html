@@ -1596,14 +1596,25 @@ function totalPlacesCount(){
   return itinerary.reduce((sum, day) => sum + day.places.length, 0);
 }
 
-function mapUrl(mapValue){
+
+function mapUrl(mapValue) {
   const value = String(mapValue || '').trim();
-  if(!value) return '';
 
-  if(/^https?:\/\//i.test(value)) return value;
+  if (!value) return '';
 
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(value)}`;
+  // ถ้าเป็นลิงก์แชร์ Amap ใช้ลิงก์เดิมทันที
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
+
+  // ถ้าเป็นชื่อสถานที่ ให้ค้นหาผ่าน Amap
+  return 'https://uri.amap.com/search?' +
+    'keyword=' + encodeURIComponent(value) +
+    '&view=map' +
+    '&src=shanghai-trip-2026' +
+    '&callnative=1';
 }
+
 
 /* ================= RENDER ================= */
 const daysContainer = document.getElementById('daysContainer');
