@@ -1458,19 +1458,28 @@ body{
 
 <script>
 /* ================= DATA ================= */
+
 const MASTER_PLAN_VERSION = "shanghai-suzhou-2026-11-23-v1";
-// เปลี่ยนแผนกลางที่นี่แล้วอัปโหลด index.html ใหม่ ทุกเครื่องจะเห็นแผนเดียวกัน
-// ห้ามเปลี่ยน id ของสถานที่เดิมหากต้องการรักษาสถานะ SUCCESSFUL ส่วนตัวไว้
+
 const DEFAULT_ITINERARY = [
   {
     day: 1,
     title: "DAY 1 · SAT 28 NOV — Shanghai Old & New",
     places: [
-      { id: "d1-hotel", name: "🏨 ฝากกระเป๋า / โรงแรม 宸家酒店 (Huanghe Road)", map: "宸家酒店 上海南京路步行街黄河路店 Shanghai China" },
-      { id: "d1-huanghe", name: "Huanghe Road · เดินสำรวจย่านโรงแรม", map: "Home Inn (Shanghai Nanjing Road Pedestrian Street Huanghe Road Branch)
-ประหยัด
-黄河路288号-1(新闸路地铁站6号口步行110米)
-https://surl.amap.com/dFNFtbQwd9M" },
+      {
+        id: "d1-hotel",
+        name: "🏨 ฝากกระเป๋า / โรงแรม 宸家酒店 (Huanghe Road)",
+        map: "宸家酒店 上海南京路步行街黄河路店 Shanghai China"
+      },
+      {
+        id: "d1-huanghe",
+        name: "Huanghe Road · เดินสำรวจย่านโรงแรม",
+        map: "https://surl.amap.com/dFNFtbQwd9M"
+      }
+    ]
+  }
+];
+
       { id: "d1-peoplespark", name: "People’s Park · เดินเล่นสวนสาธารณะ", map: "People’s Park Shanghai China" },
       { id: "d1-nanjing", name: "Nanjing Road Pedestrian Street", map: "Nanjing Road Pedestrian Street Shanghai China" },
       { id: "d1-rockbund", name: "Rockbund · อาคารประวัติศาสตร์และศิลปะ", map: "Rockbund Shanghai China" },
