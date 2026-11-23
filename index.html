@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Shanghai Trip 2026</title>
+<title>Shanghai + Suzhou Trip 2026 | Fixed Master Plan</title>
 
 <meta name="theme-color" content="#C8102E">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1130,6 +1130,8 @@ body{
   color:var(--white);
 }
 
+  .master-plan-note{font-size:17px;color:var(--cream);margin:2px 0 12px;line-height:1.3;}
+  .add-day-wrap[hidden]{display:none !important;}
 </style>
 </head>
 <body>
@@ -1221,7 +1223,7 @@ body{
   </div>
 
   <div class="pixel-box hotel-note">
-    🏨 โรงแรม: แถว Nanjing Road (ยังไม่ได้จอง — TBD)
+    🏨 宸家酒店(上海南京路步行街黄河路店) · Huanghe Road / Nanjing Road
   </div>
 
   <div class="progress-wrap" id="progressLabel">0 / 0 SPOTS DONE</div>
@@ -1234,13 +1236,14 @@ body{
     </div>
 
     <div class="section-label-row">
-      <div class="section-label">TRAVEL PLANS</div>
+      <div class="section-label">TRAVEL PLANS · SHARED</div>
     </div>
 
+    <div class="master-plan-note">📌 FIXED MASTER PLAN · ทุกคนเห็นสถานที่เหมือนกัน · ✔ DONE แยกตามเครื่อง</div>
     <div id="daysContainer"></div>
 
-    <div class="add-day-wrap">
-      <button id="addDayBtn" class="add-day-btn" type="button">＋ ADD DAY</button>
+    <div class="add-day-wrap" hidden>
+      <button id="addDayBtn" class="add-day-btn" type="button" disabled aria-hidden="true">＋ ADD DAY</button>
     </div>
   </div>
 
@@ -1455,68 +1458,71 @@ body{
 
 <script>
 /* ================= DATA ================= */
+const MASTER_PLAN_VERSION = "shanghai-suzhou-2026-11-23-v1";
+// เปลี่ยนแผนกลางที่นี่แล้วอัปโหลด index.html ใหม่ ทุกเครื่องจะเห็นแผนเดียวกัน
+// ห้ามเปลี่ยน id ของสถานที่เดิมหากต้องการรักษาสถานะ SUCCESSFUL ส่วนตัวไว้
 const DEFAULT_ITINERARY = [
   {
     day: 1,
-    title: "DAY 1 — แลนด์มาร์กเซี่ยงไฮ้",
+    title: "DAY 1 · SAT 28 NOV — Shanghai Old & New",
     places: [
-      { name: "Check-in โรงแรม (แถว Nanjing Road)", lat: 31.2359, lng: 121.4767 },
-      { name: "Nanjing Road Pedestrian Street", lat: 31.2359, lng: 121.4767 },
-      { name: "The Bund", lat: 31.2397, lng: 121.4906 },
-      { name: "ถ่ายรูปวิว Oriental Pearl Tower", lat: 31.2397, lng: 121.4998 },
-      { name: "เดินเล่นริมแม่น้ำกลางคืน", lat: 31.2410, lng: 121.4900 }
+      { id: "d1-hotel", name: "🏨 ฝากกระเป๋า / โรงแรม 宸家酒店 (Huanghe Road)", map: "宸家酒店 上海南京路步行街黄河路店 Shanghai China" },
+      { id: "d1-huanghe", name: "Huanghe Road · เดินสำรวจย่านโรงแรม", map: "Huanghe Road Shanghai China" },
+      { id: "d1-peoplespark", name: "People’s Park · เดินเล่นสวนสาธารณะ", map: "People’s Park Shanghai China" },
+      { id: "d1-nanjing", name: "Nanjing Road Pedestrian Street", map: "Nanjing Road Pedestrian Street Shanghai China" },
+      { id: "d1-rockbund", name: "Rockbund · อาคารประวัติศาสตร์และศิลปะ", map: "Rockbund Shanghai China" },
+      { id: "d1-bund", name: "The Bund · วิวแม่น้ำหวงผู่ยามเย็น", map: "The Bund Shanghai China" },
+      { id: "d1-bbq", name: "Long Time Ago BBQ · มื้อเย็น", map: "Long Time Ago BBQ Shanghai China" }
     ]
   },
   {
     day: 2,
-    title: "DAY 2 — ดิสนีย์แลนด์ (อยู่ทั้งวัน)",
+    title: "DAY 2 · SUN 29 NOV — Wukang & West Bund",
     places: [
-      { name: "เข้าเช้า Shanghai Disneyland", lat: 31.1443, lng: 121.6577 },
-      { name: "ดูพาเหรด", lat: 31.1443, lng: 121.6577 },
-      { name: "เล่นเครื่องเล่นหลัก", lat: 31.1443, lng: 121.6577 },
-      { name: "รอดูพลุ", lat: 31.1443, lng: 121.6577 }
+      { id: "d2-wukangmansion", name: "Wukang Mansion", map: "Wukang Mansion Shanghai China" },
+      { id: "d2-wukangroad", name: "Wukang Road · เดินเล่นย่านประวัติศาสตร์", map: "Wukang Road Shanghai China" },
+      { id: "d2-anfu", name: "Anfu Road · ร้านค้าและคาเฟ่", map: "Anfu Road Shanghai China" },
+      { id: "d2-westbundmuseum", name: "West Bund Museum", map: "West Bund Museum Shanghai China" },
+      { id: "d2-longmuseum", name: "Long Museum · West Bund", map: "Long Museum West Bund Shanghai China" },
+      { id: "d2-westbundriver", name: "West Bund Riverside · เดินริมแม่น้ำ", map: "West Bund Riverside Shanghai China" }
     ]
   },
   {
     day: 3,
-    title: "DAY 3 — ย่านชิคที่สุดของเซี่ยงไฮ้",
+    title: "DAY 3 · MON 30 NOV — Shanghai Disneyland",
     places: [
-      { name: "Wukang Mansion", lat: 31.2076, lng: 121.4367 },
-      { name: "Anfu Road", lat: 31.2107, lng: 121.4433 },
-      { name: "คาเฟ่ (ย่าน Anfu Road)", lat: 31.2107, lng: 121.4433 },
-      { name: "Tianzifang", lat: 31.2093, lng: 121.4692 },
-      { name: "White Rabbit (ย่าน Tianzifang)", lat: 31.2093, lng: 121.4692 },
-      { name: "Xintiandi", lat: 31.2185, lng: 121.4756 },
-      { name: "Butterful & Creamorous (ถ้ายังไหว)", lat: 31.2197, lng: 121.4737 }
+      { id: "d3-disneyarrive", name: "Shanghai Disneyland · เข้าสวนสนุก", map: "Shanghai Disneyland Shanghai China" },
+      { id: "d3-disneyrides", name: "เครื่องเล่นหลัก · Shanghai Disneyland", map: "Shanghai Disneyland Shanghai China" },
+      { id: "d3-disneyparade", name: "ชมพาเหรด / การแสดง", map: "Shanghai Disneyland Shanghai China" },
+      { id: "d3-disneyfireworks", name: "ชมการแสดงปิดท้าย / พลุ (ตามรอบจริง)", map: "Shanghai Disneyland Shanghai China" }
     ]
   },
   {
     day: 4,
-    title: "DAY 4 — MUSEUM DAY",
+    title: "DAY 4 · TUE 1 DEC — Suzhou Day Trip",
     places: [
-      { name: "1000 Trees", lat: 31.2453, lng: 121.4562 },
-      { name: "Natural History Museum", lat: 31.2389, lng: 121.4489 },
-      { name: "1933 Old Millfun", lat: 31.2662, lng: 121.4834 },
-      { name: "China Art Museum", lat: 31.1913, lng: 121.5062 },
-      { name: "Space & Time Cube", lat: 31.2532, lng: 121.4941 },
-      { name: "Huaihai Road", lat: 31.2185, lng: 121.4644 },
-      { name: "West Nanjing Road", lat: 31.2258, lng: 121.4487 },
-      { name: "Street Food", lat: 31.2258, lng: 121.4487 }
+      { id: "d4-suzhoumuseum", name: "Suzhou Museum · พิพิธภัณฑ์", map: "Suzhou Museum Suzhou Jiangsu China" },
+      { id: "d4-humblegarden", name: "Humble Administrator’s Garden · สวนจีน", map: "Humble Administrators Garden Suzhou Jiangsu China" },
+      { id: "d4-pingjiang", name: "Pingjiang Road · คลองและย่านเมืองเก่า", map: "Pingjiang Road Suzhou Jiangsu China" },
+      { id: "d4-shantang", name: "Shantang Street · เดินเล่นช่วงเย็น", map: "Shantang Street Suzhou Jiangsu China" }
     ]
   },
   {
     day: 5,
-    title: "DAY 5 — ก่อนกลับ",
+    title: "DAY 5 · WED 2 DEC — Yu Garden & Departure",
     places: [
-      { name: "Yu Garden", lat: 31.2277, lng: 121.4920 },
-      { name: "ซื้อของฝาก", lat: 31.2277, lng: 121.4920 },
-      { name: "Shanghai Tower (ถ้ามีเวลา ขึ้นดูวิว)", lat: 31.2337, lng: 121.5057 }
+      { id: "d5-checkout", name: "เช็กเอาต์ / ฝากกระเป๋าที่โรงแรม", map: "宸家酒店 上海南京路步行街黄河路店 Shanghai China" },
+      { id: "d5-yugarden", name: "Yu Garden · สวนจีน", map: "Yu Garden Shanghai China" },
+      { id: "d5-yuyuan", name: "Yuyuan Bazaar · เดินซื้อของฝาก", map: "Yuyuan Bazaar Shanghai China" },
+      { id: "d5-pvg", name: "Shanghai Pudong International Airport (PVG) · เที่ยวบินขากลับ", map: "Shanghai Pudong International Airport China" }
     ]
   }
 ];
 
-const STATE_STORAGE_KEY = 'shanghaiTrip2026State';
-const PLAN_STORAGE_KEY = 'shanghaiTrip2026EditablePlanV1';
+// ทุกเครื่องโหลดแผนเที่ยวจาก DEFAULT_ITINERARY เท่านั้น
+// LocalStorage ใช้บันทึก SUCCESSFUL เฉพาะเครื่อง และไม่อ่านแผนที่เคยแก้เอง
+const STATE_STORAGE_KEY = 'shanghaiTrip2026FixedMasterProgressV1';
+const PLAN_STORAGE_KEY = 'shanghaiTrip2026EditablePlanV1'; // legacy: ไม่อ่านอีกต่อไป
 
 function makeId(prefix='id'){
   if(window.crypto && typeof crypto.randomUUID === 'function'){
@@ -1546,15 +1552,7 @@ function normalizePlan(plan){
 }
 
 function loadTripPlan(){
-  const saved = localStorage.getItem(PLAN_STORAGE_KEY);
-  if(saved){
-    try{
-      const parsed = JSON.parse(saved);
-      if(Array.isArray(parsed)) return normalizePlan(parsed);
-    }catch(error){
-      console.error('โหลดแพลนไม่สำเร็จ:', error);
-    }
-  }
+  // Fixed Master Plan: ไม่โหลดข้อมูลแผนแก้ไขของแต่ละคนจาก LocalStorage
   return normalizePlan(cloneDefaultPlan());
 }
 
@@ -1565,7 +1563,8 @@ let editingDayNumber = null;
 let editingPlaceId = null;
 
 function saveTripPlan(){
-  localStorage.setItem(PLAN_STORAGE_KEY, JSON.stringify(itinerary));
+  // โหมด Fixed Master: บล็อกการแก้ไขแผนจากอุปกรณ์ผู้ใช้
+  return;
 }
 
 function saveState(){
@@ -1620,15 +1619,14 @@ function render(){
     header.className = 'day-header pixel-font';
     header.innerHTML = `
       <span class="day-header-title">${escapeHtml(day.title)}</span>
-      <button class="pixel-btn add-place-btn" type="button"
-              data-role="addPlaceBtn" data-day="${day.day}" aria-label="เพิ่มสถานที่">＋</button>
+
     `;
     dayEl.appendChild(header);
 
     if(day.places.length === 0){
       const empty = document.createElement('div');
       empty.className = 'empty-day';
-      empty.textContent = 'ยังไม่มีสถานที่ กด + เพื่อเพิ่ม';
+      empty.textContent = 'ยังไม่มีสถานที่ในแผนกลาง';
       dayEl.appendChild(empty);
     }
 
@@ -1648,13 +1646,6 @@ function render(){
           ${href ? `<a class="map-link" href="${escapeAttribute(href)}" target="_blank" rel="noopener">📍 ดูแผนที่</a>` : ''}
 
           <div class="place-edit-actions">
-            <button class="pixel-btn mini-edit-btn" type="button"
-                    data-role="editPlaceBtn" data-day="${day.day}" data-place-id="${place.id}"
-                    aria-label="แก้ไขสถานที่">✏️</button>
-
-            <button class="pixel-btn mini-delete-btn" type="button"
-                    data-role="deletePlaceBtn" data-day="${day.day}" data-place-id="${place.id}"
-                    aria-label="ลบสถานที่">🗑</button>
 
             <button class="pixel-btn ${isDone ? 'done' : ''}" type="button"
                     data-key="${place.id}" data-role="successBtn" ${isDone ? 'disabled' : ''}>
@@ -1669,11 +1660,7 @@ function render(){
     const resetRow = document.createElement('div');
     resetRow.className = 'reset-row';
     resetRow.innerHTML = `
-      ${day.day > DEFAULT_ITINERARY.length
-        ? `<button class="pixel-btn delete-day-btn" type="button"
-                   data-role="deleteDayBtn" data-day="${day.day}">🗑 DELETE DAY ${day.day}</button>`
-        : ''
-      }
+      
       <button class="pixel-btn reset-btn" type="button"
               data-day="${day.day}" data-role="resetBtn">↺ RESET DAY ${day.day}</button>
     `;
@@ -1784,6 +1771,8 @@ function closePlaceEditor(){
 }
 
 function savePlaceFromEditor(){
+  // Fixed Master Plan: disabled
+  return;
   const name = placeNameInput.value.trim();
   const map = placeMapInput.value.trim();
 
@@ -1819,6 +1808,8 @@ function savePlaceFromEditor(){
 }
 
 function deletePlace(dayNumber, placeId){
+  // Fixed Master Plan: disabled
+  return;
   const day = itinerary.find(item => item.day === dayNumber);
   if(!day) return;
 
@@ -1865,6 +1856,8 @@ function closeDayEditor(){
 }
 
 function saveDayFromEditor(){
+  // Fixed Master Plan: disabled
+  return;
   const title = dayTitleInput.value.trim();
   if(!title){
     alert('กรุณาใส่ชื่อแพลนของวันนี้');
@@ -1890,6 +1883,8 @@ function saveDayFromEditor(){
 }
 
 function deleteDay(dayNumber){
+  // Fixed Master Plan: disabled
+  return;
   const day = itinerary.find(item => item.day === dayNumber);
   if(!day) return;
 
