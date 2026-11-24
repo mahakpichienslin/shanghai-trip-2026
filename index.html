@@ -1199,7 +1199,32 @@ body.started .bottom-nav{display:grid!important}
 .place-actions{display:flex;align-items:center;justify-content:space-between;width:100%;margin-left:0;gap:10px}
 .place-actions .pixel-btn{margin-left:auto}
 
+
+/* === V9 Interactive map === */
+.trip-map-controls{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}
+.trip-map-controls label{font-family:inherit;font-size:17px;color:#6a2e24}
+.trip-map-controls select{max-width:100%;min-height:41px;background:#fff9e9;border:2px solid #a76e45;border-radius:8px;color:#772b1b;font-size:17px;padding:6px}
+.trip-map-frame{width:100%;height:min(63vh,520px);min-height:370px;border:4px solid #8f3825;border-radius:12px;overflow:hidden;background:#ece6d4;position:relative;z-index:0}
+.trip-map-frame .leaflet-container{font-family:Arial,sans-serif}
+.trip-map-frame .leaflet-control-attribution{font-size:10px}
+.trip-map-marker{background:#fff8e8;border:2px solid #752615;border-radius:999px;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;font-size:17px;box-shadow:0 2px 5px #0005}
+.trip-map-marker.food{background:#ffde9b}.trip-map-marker.place{background:#e2f4f0}
+.trip-map-marker.optional{border-style:dashed;opacity:.85}
+.trip-map-popup{font-family:Arial,sans-serif;font-size:14px;line-height:1.5;max-width:230px}
+.trip-map-popup strong{color:#822e1c;font-size:15px}
+.trip-map-popup a{display:inline-block;color:#8e2119;margin-top:7px;font-weight:bold}
+.trip-map-mini{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0}
+.trip-map-mini .key{padding:7px 3px;background:#fff9ec;border:1px solid #c8a58c;border-radius:7px;font-size:13px;text-align:center;color:#663e32}
+.trip-map-list{margin-top:13px;display:grid;gap:8px}
+.trip-map-entry{display:flex;align-items:start;justify-content:space-between;gap:8px;border:2px solid #dfc9ac;border-radius:8px;padding:8px 9px;background:#fffaf0}
+.trip-map-entry button{border:0;background:none;cursor:pointer;color:#782c23;text-align:left;font:inherit;font-size:15px;line-height:1.35;flex:1}
+.trip-map-entry a{flex-shrink:0;font-size:14px;color:#8a2519;font-weight:bold}
+.trip-map-hint{font-size:15px;line-height:1.5;color:#735949}
+@media(max-width:390px){.trip-map-frame{min-height:330px}.trip-map-controls select{font-size:15px}}
+
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzxR6eb1U8PZ6JGL1b+2u5F8=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body>
   <button id="musicBtn" class="pixel-btn music-btn">
@@ -1273,7 +1298,7 @@ body.started .bottom-nav{display:grid!important}
       <div class="section-label">TRAVEL PLANS · SHARED</div>
     </div>
 
-    <div class="master-plan-note">📌 FIXED MASTER PLAN · ✔ DONE แยกตามเครื่อง · 🕒 เวลาเป็นข้อเสนอ (ปรับตามตั๋วจริง) · 📷 ถ่ายรูปให้สนุกจ้า</div>
+    <div class="master-plan-note">📌 FIXED MASTER PLAN · ✔ DONE แยกตามเครื่อง · 🕒 เวลาเป็นข้อเสนอ (ปรับตามตั๋วจริง) · 📷 กดรูปเพื่อเพิ่มภาพในเครื่อง</div>
     <div id="daysContainer"></div>
 
     <div class="add-day-wrap" hidden>
@@ -1287,6 +1312,22 @@ body.started .bottom-nav{display:grid!important}
     <div class="section-heading">🍜 FOOD & CAFE</div>
     <p class="section-intro">13 ร้านที่เลือกเอง · จัดใกล้เส้นทางเที่ยว · OPTION หมายถึงแวะเฉพาะถ้ามีเวลา · เช็กเวลาเปิดใน Amap อีกครั้ง</p>
     <div id="foodContainer"></div>
+  </section>
+
+  <section id="mapPanel" class="app-panel" hidden>
+    <div class="section-heading">🗺️ TRIP MAP</div>
+    <p class="section-intro">แตะหมุดเพื่อดูรายละเอียด แล้วเปิด Amap สำหรับนำทางจริง · ภาพแผนที่ต้องใช้อินเทอร์เน็ต</p>
+    <div class="pixel-box utility-card">
+      <div class="trip-map-controls">
+        <label>📅 วันเที่ยว <select id="tripMapDay" aria-label="เลือกวันเที่ยว"><option value="all">ALL DAYS</option><option value="1">DAY 1 · SHANGHAI</option><option value="2">DAY 2 · CAFE</option><option value="3">DAY 3 · DISNEY</option><option value="4">DAY 4 · SUZHOU</option><option value="5">DAY 5 · RETURN</option></select></label>
+        <label>📌 ประเภท <select id="tripMapKind" aria-label="ประเภทหมุด"><option value="all">ทุกประเภท</option><option value="place">🏯 ที่เที่ยว</option><option value="food">🍜 ร้านอาหาร</option></select></label>
+      </div>
+      <div class="trip-map-mini"><div class="key">🏯 ที่เที่ยว</div><div class="key">🍜 FOOD</div><div class="key">🥐 CAFE</div></div>
+      <div id="tripMap" class="trip-map-frame" role="region" aria-label="แผนที่ทริปเซี่ยงไฮ้และซูโจว"></div>
+      <p class="trip-map-hint" id="tripMapStatus">กำลังเตรียมแผนที่... หมุดเป็นพิกัดโดยประมาณเพื่อช่วยดูย่านและลำดับสถานที่ ไม่ใช่ GPS หน้าร้านที่ยืนยันแล้ว</p>
+      <p class="trip-map-hint">🚶 เส้นทางจริงและเวลาเดินทางให้ตรวจใน Amap ทุกครั้ง โดยเฉพาะในจีนที่บริการแผนที่อาจใช้ระบบพิกัดต่างกัน</p>
+      <div id="tripMapList" class="trip-map-list"></div>
+    </div>
   </section>
   <section id="docsPanel" class="app-panel" hidden>
     <div class="section-heading">✈️ FLIGHT</div>
@@ -1344,6 +1385,7 @@ body.started .bottom-nav{display:grid!important}
 <nav class="bottom-nav" aria-label="เมนูหลัก">
   <button class="nav-item active" data-tab="plan" aria-current="page"><span>🗺️</span>PLAN</button>
   <button class="nav-item" data-tab="food"><span>🍜</span>FOOD</button>
+  <button class="nav-item" data-tab="map"><span>📍</span>MAP</button>
   <button class="nav-item" data-tab="docs"><span>✈️</span>FLIGHT</button>
   <button class="nav-item" data-tab="help"><span>🛟</span>HELP</button>
 </nav>
@@ -3103,12 +3145,91 @@ function renderPhrases(){
  });
 }
 async function copyText(value){try{await navigator.clipboard.writeText(value);alert('คัดลอกแล้ว');}catch(e){prompt('คัดลอกข้อความนี้',value);}}
+
+// V9: Coordinates are approximate planning markers, not verified door-level GPS.
+const TRIP_MAP_PLACE_COORDS={"d1-hotel": [31.2354, 121.4691], "d1-huanghe": [31.2359, 121.4695], "d1-peoplespark": [31.2327, 121.4681], "d1-nanjing": [31.2369, 121.4792], "d1-rockbund": [31.2445, 121.4899], "d1-bund": [31.241, 121.4912], "d1-bbq": [31.2243, 121.4821], "d2-wukangmansion": [31.2038, 121.4381], "d2-wukangroad": [31.2091, 121.4385], "d2-anfu": [31.213, 121.4425], "d2-westbundmuseum": [31.1801, 121.459], "d2-longmuseum": [31.1829, 121.463], "d2-westbundriver": [31.1865, 121.4655], "d3-disneyarrive": [31.1432, 121.6573], "d3-disneyrides": [31.1432, 121.6573], "d3-disneyparade": [31.1432, 121.6573], "d3-disneyfireworks": [31.1432, 121.6573], "d4-suzhoumuseum": [31.3245, 120.6308], "d4-humblegarden": [31.3268, 120.629], "d4-pingjiang": [31.3159, 120.6362], "d4-shantang": [31.32, 120.5986], "d5-checkout": [31.2354, 121.4691], "d5-yugarden": [31.2271, 121.4915], "d5-yuyuan": [31.2281, 121.4917], "d5-pvg": [31.1442, 121.8083]};
+const TRIP_MAP_FOOD_COORDS={"定兴路蛋饼摊": [31.2358, 121.463], "小杨生煎": [31.2356, 121.4698], "陶陶居": [31.2335, 121.4688], "费大厨辣椒炒肉": [31.233, 121.4778], "莱莱小笼": [31.2408, 121.4794], "很久以前羊肉串": [31.2235, 121.4819], "BUTTERFUL & CREAMOROUS": [31.2312, 121.4564], "AMAM LONBAKERY TOWN": [31.2312, 121.456], "阿元来了": [31.2178, 121.4579], "九龙冰室": [31.2066, 121.4673], "New York Bagelous Museum": [31.2178, 121.4764], "小菜园": [31.24, 121.5008], "好利来": [31.2403, 121.5006], "裕兴记": [31.3259, 120.6348], "桃花源记": [31.3175, 120.6355], "伏羲古琴文化会馆": [31.317, 120.636], "松鹤楼": [31.3197, 120.5982], "上海老饭店": [31.228, 121.4902], "Shanghai Lao Fan Dian": [31.228, 121.4902]};
+let tripLeafletMap=null, tripMarkerLayer=null, tripMapPoints=[];
+const mapDisplayDay=()=>document.getElementById('tripMapDay').value;
+function getMapPlaceRows(){
+ const rows=[];
+ itinerary.forEach(day=>day.places.forEach(place=>{
+   const coord=TRIP_MAP_PLACE_COORDS[place.id];
+   // Multiple attractions within Disneyland share one landmark-level marker.
+   if(!coord || (day.day===3 && place.id!=='d3-disneyarrive'))return;
+   rows.push({id:place.id,day:day.day,kind:'place',name:place.name,map:place.map,coord,optional:false});
+ }));
+ return rows;
+}
+function getMapFoodRows(){
+ const rows=[];
+ FOOD_GUIDE.forEach(g=>g.items.forEach((f,index)=>{
+   const name=Object.keys(TRIP_MAP_FOOD_COORDS).find(k=>f.name.includes(k));
+   if(!name)return;
+   rows.push({id:`food-${g.day}-${index}-${rows.length}`,day:g.day,kind:'food',name:f.name,map:f.map,coord:TRIP_MAP_FOOD_COORDS[name],optional:!!f.optional,slot:f.slot,foodKind:f.kind});
+ }));
+ return rows;
+}
+function tripMapRows(){
+ const day=mapDisplayDay(),kind=document.getElementById('tripMapKind').value;
+ return tripMapPoints.filter(p=>(day==='all'||p.day===Number(day))&&(kind==='all'||p.kind===kind));
+}
+function mapIconFor(row){return row.kind==='place'?'🏯':row.foodKind==='คาเฟ่'?'🥐':row.foodKind==='ของฝาก'?'🎁':'🍜';}
+function buildTripMapList(rows){
+ const list=document.getElementById('tripMapList');list.replaceChildren();
+ rows.forEach((row,i)=>{
+   const entry=document.createElement('div');entry.className='trip-map-entry';
+   const button=document.createElement('button');button.type='button';
+   button.textContent=`${mapIconFor(row)} DAY ${row.day} · ${row.name}${row.optional?' · OPTION':''}`;
+   button.addEventListener('click',()=>{
+     if(!tripLeafletMap) return;
+     tripLeafletMap.setView(row.coord,15);
+     row.marker?.openPopup();
+     document.getElementById('tripMap').scrollIntoView({behavior:'smooth',block:'center'});
+   });
+   const link=document.createElement('a');link.href=mapUrl(row.map);link.target='_blank';link.rel='noopener noreferrer';link.textContent='AMAP ↗';
+   entry.append(button,link);list.appendChild(entry);
+ });
+}
+function updateTripMap(){
+ const rows=tripMapRows();buildTripMapList(rows);
+ const status=document.getElementById('tripMapStatus');
+ if(!window.L){status.textContent='แผนที่ยังโหลดไม่ได้ (ต้องต่ออินเทอร์เน็ต) แต่กด AMAP ที่รายชื่อด้านล่างได้ตามปกติ';return;}
+ if(!tripLeafletMap){
+   tripLeafletMap=L.map('tripMap',{zoomControl:true,scrollWheelZoom:false}).setView([31.23,121.48],12);
+   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:18}).addTo(tripLeafletMap);
+   tripMarkerLayer=L.layerGroup().addTo(tripLeafletMap);
+ }
+ tripMarkerLayer.clearLayers();
+ const bounds=[];
+ rows.forEach(row=>{
+   const icon=L.divIcon({className:'',html:`<div class="trip-map-marker ${row.kind} ${row.optional?'optional':''}">${mapIconFor(row)}</div>`,iconSize:[36,36],iconAnchor:[18,18]});
+   const marker=L.marker(row.coord,{icon}).addTo(tripMarkerLayer);
+   const popup=document.createElement('div');popup.className='trip-map-popup';
+   const strong=document.createElement('strong');strong.textContent=`DAY ${row.day} · ${row.name}`;
+   const note=document.createElement('div');note.textContent=`${row.kind==='food'?(row.slot||'FOOD'):'จุดเที่ยวใน PLAN'} · พิกัดบนแผนที่โดยประมาณ`;
+   const a=document.createElement('a');a.href=mapUrl(row.map);a.target='_blank';a.rel='noopener noreferrer';a.textContent='📍 เปิดนำทางใน Amap';
+   popup.append(strong,note,a);marker.bindPopup(popup);row.marker=marker;bounds.push(row.coord);
+ });
+ if(bounds.length>1)tripLeafletMap.fitBounds(bounds,{padding:[26,26],maxZoom:14});
+ else if(bounds.length)tripLeafletMap.setView(bounds[0],14);
+ setTimeout(()=>tripLeafletMap?.invalidateSize(),100);
+ const day=mapDisplayDay();
+ status.textContent=`แสดง ${rows.length} หมุด${day==='all'?' ทุกวัน':' DAY '+day} · เป็นจุดช่วยวางแผนโดยประมาณ อาจคลาดเคลื่อนจากตำแหน่งหน้าร้านจริง · เปิด Amap เพื่อนำทาง`;
+}
+function initTripMap(){
+ tripMapPoints=[...getMapPlaceRows(),...getMapFoodRows()];
+ document.getElementById('tripMapDay').addEventListener('change',updateTripMap);
+ document.getElementById('tripMapKind').addEventListener('change',updateTripMap);
+}
+
 function switchTab(tab){
  document.querySelectorAll('.app-panel').forEach(panel=>panel.hidden=panel.id!==tab+'Panel');
  document.querySelectorAll('.nav-item').forEach(btn=>{
   const active=btn.dataset.tab===tab;btn.classList.toggle('active',active);
   if(active)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current');
  });
+ if(tab==='map') requestAnimationFrame(updateTripMap);
  window.scrollTo({top:0,behavior:'instant'});
 }
 function initCompanion(){
@@ -3126,7 +3247,7 @@ function initCompanion(){
    }catch(e){document.getElementById('offlineMessage').textContent='Offline unavailable: '+e.message;}
  });
  window.addEventListener('online',updateOfflineStatus);window.addEventListener('offline',updateOfflineStatus);
- updateOfflineStatus();renderFood();renderPhrases();
+ updateOfflineStatus();renderFood();renderPhrases();initTripMap();
  if('serviceWorker' in navigator && location.protocol==='https:'){
     navigator.serviceWorker.register('./sw.js').then(()=>navigator.serviceWorker.ready).then(()=>{
       document.getElementById('offlineMessage').textContent='Offline shell พร้อม: หน้าแผนและข้อมูลจำเป็นใช้ได้หลังโหลดครั้งแรก ข้อมูลสดและ Amap ต้องใช้เน็ต';
