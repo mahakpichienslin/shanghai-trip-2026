@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Shanghai + Suzhou Trip 2026 | Flight Only V4</title>
+<title>Shanghai + Suzhou Trip 2026 | Curated Food V7</title>
 
-<meta name="theme-color" content="#C8102E"> 
+<meta name="theme-color" content="#C8102E">
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -704,22 +704,6 @@ body{
   text-align:right;
 }
 
-  
-/* MAP ด้านซ้าย / SUCCESSFUL ด้านขวา */
-.place-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-left: 0;
-  gap: 10px;
-}
-
-.place-actions .pixel-btn {
-  margin-left: auto;
-}
-
-
 #endTripBtn{
   display:block;
   margin: 30px auto 10px;
@@ -1201,6 +1185,20 @@ body.started .bottom-nav{display:grid!important}
 .offline-indicator{font-size:17px;color:var(--cream);margin-top:8px}
 @media(min-width:600px){.place-photo{width:130px;height:105px;flex-basis:130px}}
 
+
+/* FOOD & CAFE — curated master list */
+.curated-food-item{border-top:2px dotted #b89a5e;padding:12px 0;display:flex;flex-direction:column;gap:4px}
+.curated-food-name{font-size:21px;font-weight:bold;color:#8A1B14;line-height:1.25}
+.curated-food-slot{font-size:17px;color:#AA4620}
+.curated-food-item a{font-size:18px;margin-top:4px;align-self:flex-start}
+.day-food-banner{width:100%;border:2px solid #b89a5e;border-radius:10px;overflow:hidden;background:#f7efe0;margin:10px 0 12px}
+.day-food-banner img{display:block;width:100%;height:auto;aspect-ratio:5/2;object-fit:cover}
+.day-food-banner .fallback-note{padding:10px 12px;font-size:16px;color:#745b37}
+
+/* MAP on left, SUCCESSFUL on right */
+.place-actions{display:flex;align-items:center;justify-content:space-between;width:100%;margin-left:0;gap:10px}
+.place-actions .pixel-btn{margin-left:auto}
+
 </style>
 </head>
 <body>
@@ -1287,7 +1285,7 @@ body.started .bottom-nav{display:grid!important}
   </section>
   <section id="foodPanel" class="app-panel" hidden>
     <div class="section-heading">🍜 FOOD & CAFE</div>
-    <p class="section-intro">ร้านและเมนูตามย่านของแต่ละวัน · เป็นไอเดียที่ควรตรวจเวลาทำการและสาขาจริงใน Amap ก่อนเดินทาง</p>
+    <p class="section-intro">13 ร้านที่เลือกเอง · จัดใกล้เส้นทางเที่ยว · OPTION หมายถึงแวะเฉพาะถ้ามีเวลา · เช็กเวลาเปิดใน Amap อีกครั้ง</p>
     <div id="foodContainer"></div>
   </section>
   <section id="docsPanel" class="app-panel" hidden>
@@ -2834,11 +2832,185 @@ const TIME_INFO = {
 };
 const DAY_EMOJI=['🏙️','🏛️','🏰','🏯','🌿'];
 const FOOD_GUIDE=[
- {day:1,area:'Huanghe Road / Nanjing Road',items:[['小笼包 · เสี่ยวหลงเปา','มื้อเช้าหรือกลางวัน','黄河路 小笼包 上海'],['葱油拌面 · บะหมี่น้ำมันต้นหอม','จานท้องถิ่น','南京东路 葱油拌面'],['Long Time Ago BBQ','มื้อเย็นในแผน · เช็กสาขาก่อน','Long Time Ago BBQ 上海']]},
- {day:2,area:'Wukang / Anfu / West Bund',items:[['Cafe · 安福路','พักระหว่างเดินย่าน Wukang','安福路 咖啡'],['上海本帮菜 · อาหารเซี่ยงไฮ้','อาหารกลางวัน','武康路 本帮菜'],['West Bund Cafe','ช่วงบ่ายใกล้พิพิธภัณฑ์','西岸美术馆 咖啡']]},
- {day:3,area:'Shanghai Disneyland',items:[['Disneyland Dining','เลือกอาหารในสวนสนุก','上海迪士尼乐园 餐厅'],['Disneytown','ตัวเลือกนอกสวนสนุก (ถ้ามีเวลา)','迪士尼小镇 美食']]},
- {day:4,area:'Suzhou Old Town',items:[['苏式面 · บะหมี่ซูโจว','อาหารเช้า/กลางวัน','苏州博物馆 苏式面'],['桂花糖藕 · รากบัวหวาน','ของว่างท้องถิ่น','平江路 桂花糖藕'],['Shantang Snacks','เดินกินของว่างริมคลอง','山塘街 小吃']]},
- {day:5,area:'Yuyuan / Old Shanghai',items:[['南翔小笼 · เสี่ยวหลงเปา','เช็กคิวก่อนเข้าร้าน','豫园 南翔馒头店'],['Yuyuan Snack Street','มื้อเบาก่อนออกสนามบิน','豫园 小吃']]}
+  {
+    "day": 1,
+    "area": "People’s Square → Nanjing Road → The Bund",
+    "banner": "./assets/food/day1.png",
+    "note": "ทั้งหมดเป็นตัวเลือก ไม่ต้องกินครบทุกร้าน · เลือกตามเวลาที่หิว",
+    "items": [
+      {
+        "name": "定兴路蛋饼摊 · Ding Xing Jianbing",
+        "slot": "เช้า · ก่อนเดิน People’s Park",
+        "tip": "แพนเค้กไข่จีน · 定兴路6号 · ใกล้ People’s Square",
+        "map": "https://www.amap.com/place/B0FFJ7VYBZ",
+        "kind": "อาหาร"
+      },
+      {
+        "name": "小杨生煎 · Xiao Yang Shengjian (Yang’s Dumplings)",
+        "slot": "เช้า / ของว่าง · Huanghe Road",
+        "tip": "ซาลาเปาทอดน้ำซุป · สาขา 黄河路97号",
+        "map": "小杨生煎 黄河路97号 上海",
+        "kind": "อาหาร"
+      },
+      {
+        "name": "陶陶居 · Tao Tao Ju",
+        "slot": "มื้อสาย / กลางวัน · People’s Square",
+        "tip": "ติ่มซำกวางตุ้ง · New World City ชั้น 7 · 南京西路2-68号",
+        "map": "https://ditu.amap.com/place/B0HGAL18PS",
+        "kind": "อาหาร"
+      },
+      {
+        "name": "费大厨辣椒炒肉 · Chef Fei",
+        "slot": "กลางวัน · People’s Square",
+        "tip": "หมูผัดพริกหูหนาน · Raffles City ชั้น 7 · 西藏中路268号",
+        "map": "https://www.amap.com/place/B0K64HQF9I",
+        "kind": "อาหาร"
+      },
+      {
+        "name": "莱莱小笼 · Lai Lai Xiao Long",
+        "slot": "ของว่าง / บ่าย · Nanjing East Road",
+        "tip": "เสี่ยวหลงเปา · 天津路504号 · หลีกเลี่ยงไส้ปู/กุ้งหากแพ้",
+        "map": "来来小笼 天津路504号 上海",
+        "kind": "อาหาร"
+      },
+      {
+        "name": "很久以前羊肉串 · Long Time Ago",
+        "slot": "เย็น · หลัง The Bund",
+        "tip": "บาร์บีคิวเสียบไม้ · เลือกสาขา 云南南路180号",
+        "map": "很久以前羊肉串 云南南路180号 上海",
+        "kind": "อาหาร"
+      }
+    ]
+  },
+  {
+    "day": 2,
+    "area": "West Nanjing → Wukang / Anfu → West Bund",
+    "banner": "./assets/food/day2.png",
+    "note": "เริ่มฝั่ง West Nanjing เพื่อแวะสองร้านเบเกอรี่ที่อยู่ใกล้กัน ก่อนต่อไป Wukang",
+    "items": [
+      {
+        "name": "BUTTERFUL & CREAMOROUS · 黄油与面包",
+        "slot": "เช้า / สาย · West Nanjing Road",
+        "tip": "เบเกอรี่ · 吴江路289号 · อยู่ใกล้ AMAM",
+        "map": "https://www.amap.com/place/B0IKD9B2NU",
+        "kind": "คาเฟ่"
+      },
+      {
+        "name": "AMAM LONBAKERY TOWN · 伦敦烘焙小镇",
+        "slot": "เช้า / สาย · Wujiang Road",
+        "tip": "เบเกอรี่ธีมอังกฤษ · 吴江路269号 1F 105",
+        "map": "https://www.amap.com/place/B0K0R7I4UU",
+        "kind": "คาเฟ่"
+      },
+      {
+        "name": "阿元来了 · Yuan Is Here",
+        "slot": "กลางวัน · ทางเลือกแถบ Huaihai Road",
+        "tip": "อาหารไต้หวัน · ห้าง iAPM 淮海中路999号 · ต้องเลี้ยวออกจากเส้นหลักเล็กน้อย",
+        "map": "阿元来了 上海IAPM 淮海中路999号",
+        "kind": "อาหาร",
+        "optional": true
+      },
+      {
+        "name": "九龙冰室 · Kowloon Restaurant",
+        "slot": "กลางวัน / เย็น · ทางเลือกแถว Dapuqiao",
+        "tip": "อาหารฮ่องกง · 日月光中心 徐家汇路618号 B2 · เหมาะระหว่างเดินทางไป/กลับ West Bund",
+        "map": "https://ditu.amap.com/place/B0K6BZETU2",
+        "kind": "อาหาร",
+        "optional": true
+      },
+      {
+        "name": "New York Bagelous Museum · 纽约贝果博物馆",
+        "slot": "บ่าย / เย็น · ทางเลือก Xintiandi",
+        "tip": "เบเกิล · 马当路245号 新天地时尚二期1F L111 · ต้องแวะ Xintiandi เพิ่ม",
+        "map": "https://www.amap.com/place/B0KDM1G2VN",
+        "kind": "คาเฟ่",
+        "optional": true
+      }
+    ]
+  },
+  {
+    "day": 2,
+    "area": "Pudong / Super Brand Mall · เฉพาะถ้าตั้งใจข้ามฝั่ง",
+    "banner": "./assets/food/day2-option.png",
+    "note": "สองร้านนี้อยู่ห้างเดียวกัน แต่ฝั่งตรงข้ามแม่น้ำจากแผนหลัก จึงเป็น OPTION ไม่ควรบังคับแวะ",
+    "items": [
+      {
+        "name": "小菜园 · Xiao Cai Yuan",
+        "slot": "มื้อเย็นทางเลือก · Super Brand Mall",
+        "tip": "อาหารจีนสไตล์อานฮุย · 陆家嘴西路168号 8F27",
+        "map": "小菜园 上海浦东正大广场店 8F27",
+        "kind": "อาหาร",
+        "optional": true
+      },
+      {
+        "name": "好利来 · Holiland Super Brand Mall",
+        "slot": "ของฝาก / เบเกอรี่ · Super Brand Mall",
+        "tip": "เค้กและขนม · 陆家嘴西路168号 3F 41-42",
+        "map": "https://www.amap.com/place/B0I11S6ZRL",
+        "kind": "ของฝาก",
+        "optional": true
+      }
+    ]
+  },
+  {
+    "day": 3,
+    "area": "Shanghai Disneyland",
+    "banner": "./assets/food/day3.png",
+    "note": "ไม่มีร้านที่เลือกไว้ใน Disneyland · เลือกร้านในสวนสนุกตามคิวเครื่องเล่น",
+    "items": []
+  },
+  {
+    "day": 4,
+    "area": "Suzhou Museum → Humble Administrator’s Garden → Pingjiang Road → Shantang Street",
+    "banner": "./assets/food/day4.png",
+    "note": "จัดตามเส้นทางเที่ยว Suzhou วันเดียว ไม่ต้องอ้อมไกล · เลือกแค่ 2–3 จุดก็พอ",
+    "items": [
+      {
+        "name": "裕兴记 · Yuxingji Noodle Restaurant",
+        "slot": "มื้อเที่ยง · หลัง Suzhou Museum",
+        "tip": "บะหมี่ซูโจว · 西北街11号 · ใกล้ Suzhou Museum / Humble Administrator’s Garden",
+        "map": "裕兴记 西北街11号 苏州",
+        "kind": "อาหาร"
+      },
+      {
+        "name": "桃花源记 · Taohua Yuanji",
+        "slot": "ของว่าง / บ่าย · Pingjiang Road",
+        "tip": "ขนมและของว่างท้องถิ่น · 平江路200号附近 · ลอง红豆沙小圆子 หรือ 桂花糕",
+        "map": "桃花源记 平江路 苏州",
+        "kind": "อาหาร"
+      },
+      {
+        "name": "伏羲古琴文化会馆 · Fuxi Guqin Cultural Clubhouse",
+        "slot": "พักดื่มชา · Pingjiang Road",
+        "tip": "โรงน้ำชาบรรยากาศจีน · 平江路钮家巷31号 · เหมาะพักกลางวัน",
+        "map": "伏羲古琴文化会馆 平江路 苏州",
+        "kind": "คาเฟ่"
+      },
+      {
+        "name": "松鹤楼 · Songhelou",
+        "slot": "เย็น · Shantang Street",
+        "tip": "อาหารซูโจวแบบนั่งกิน · 山塘街/山塘街景区附近 · เหมาะมื้อเย็นก่อนกลับ",
+        "map": "松鹤楼 山塘街 苏州",
+        "kind": "อาหาร",
+        "optional": true
+      }
+    ]
+  },
+  {
+    "day": 5,
+    "area": "Yu Garden → PVG",
+    "banner": "./assets/food/day5.png",
+    "note": "ร้านมื้อหลักที่เลือก: Shanghai Lao Fan Dian ใกล้ Yu Garden · เผื่อเวลาไปรับกระเป๋าและไปสนามบิน PVG",
+    "items": [
+      {
+        "name": "上海老饭店 · Shanghai Lao Fan Dian",
+        "slot": "มื้อสาย / เที่ยง · หลังเที่ยว Yu Garden ก่อนเดินทางไป PVG",
+        "tip": "อาหารเซี่ยงไฮ้ดั้งเดิม · เลือกเมนูหมูตุ๋นซีอิ๊ว / ผัดผักได้ · ตรวจเวลาร้านและเวลารับกระเป๋าก่อนเดินทาง",
+        "map": "上海老饭店 豫园 上海",
+        "kind": "อาหาร"
+      }
+    ]
+  }
 ];
 const CHINESE_PHRASES=[
  ['我要去这里。','ฉันต้องการไปที่นี่'],
@@ -2867,18 +3039,58 @@ function closeViewer(){
  document.getElementById('viewerBox').replaceChildren();
 }
 function renderFood(){
- const wrap=document.getElementById('foodContainer');wrap.replaceChildren();
- FOOD_GUIDE.forEach(g=>{
-   const section=document.createElement('div');section.className='pixel-box utility-card';
-   section.innerHTML=`<h3>DAY ${g.day} · ${escapeHtml(g.area)}</h3>`;
-   g.items.forEach(([name,desc,search])=>{
-     const item=document.createElement('div');item.style.cssText='border-top:2px dotted #b89a5e;padding:10px 0';
-     const a=document.createElement('a');a.className='map-link';a.href=mapUrl(search);a.target='_blank';a.rel='noopener noreferrer';a.textContent='📍 AMAP';
-     const label=document.createElement('div');label.textContent=name;label.style.cssText='font-size:20px;font-weight:bold;color:#8A1B14';
-     const subtitle=document.createElement('div');subtitle.className='food-chips';subtitle.textContent=desc+' · ไม่ใช่ร้านที่จองไว้';
-     item.append(label,subtitle,a);section.appendChild(item);
-   });wrap.appendChild(section);
- });
+  const wrap = document.getElementById('foodContainer');
+  wrap.replaceChildren();
+  FOOD_GUIDE.forEach(g => {
+    const section = document.createElement('div');
+    section.className = 'pixel-box utility-card';
+    const title = document.createElement('h3');
+    title.textContent = `DAY ${g.day} · ${g.area}`;
+    section.appendChild(title);
+    if(g.banner){
+      const bannerWrap=document.createElement('div');
+      bannerWrap.className='day-food-banner';
+      const img=document.createElement('img');
+      img.src=g.banner;
+      img.alt=`DAY ${g.day} banner`;
+      img.loading='lazy';
+      img.onerror=()=>{bannerWrap.innerHTML='<div class="fallback-note">ยังไม่พบไฟล์รูป PNG ของวันนี้ · ตรวจไฟล์ใน assets/food</div>';};
+      bannerWrap.appendChild(img);
+      section.appendChild(bannerWrap);
+    }
+    const intro = document.createElement('p');
+    intro.className = 'food-chips';
+    intro.textContent = g.note;
+    section.appendChild(intro);
+    if(!g.items.length){
+      const empty=document.createElement('div');
+      empty.className='food-chips';
+      empty.textContent='ยังไม่มีร้านที่กำหนดตายตัวสำหรับวันนี้';
+      section.appendChild(empty);
+    }
+    g.items.forEach(food => {
+      const item = document.createElement('div');
+      item.className = 'curated-food-item';
+      const heading = document.createElement('div');
+      heading.className = 'curated-food-name';
+      heading.textContent = food.name;
+      const timing = document.createElement('div');
+      timing.className = 'curated-food-slot';
+      timing.textContent = `${food.kind} · ${food.slot}${food.optional ? ' · OPTION' : ''}`;
+      const detail = document.createElement('div');
+      detail.className = 'food-chips';
+      detail.textContent = food.tip;
+      const link = document.createElement('a');
+      link.className = 'map-link';
+      link.href = mapUrl(food.map);
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = '📍 เปิดใน AMAP';
+      item.append(heading,timing,detail,link);
+      section.appendChild(item);
+    });
+    wrap.appendChild(section);
+  });
 }
 function renderPhrases(){
  const wrap=document.getElementById('phraseContainer');
