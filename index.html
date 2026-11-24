@@ -1200,6 +1200,15 @@ body.started .bottom-nav{display:grid!important}
 .place-actions .pixel-btn{margin-left:auto}
 
 
+
+/* V10 map reliability: prevent style overrides + ensure full-size tiles. */
+#tripMap{display:block;min-width:0;isolation:isolate;touch-action:pan-x pan-y}
+#tripMap.leaflet-container{font-family:Arial,sans-serif;image-rendering:auto}
+#tripMap .leaflet-pane,#tripMap .leaflet-map-pane,#tripMap .leaflet-tile-pane{image-rendering:auto}
+#tripMap .leaflet-tile{max-width:none!important;max-height:none!important;image-rendering:auto!important;visibility:inherit}
+.trip-map-tools{display:flex;gap:8px;margin:8px 0;flex-wrap:wrap}
+.trip-map-tool{flex:1;min-width:130px;min-height:36px;background:#fff6e5;border:2px solid #a76e45;border-radius:8px;color:#7c3021;font-size:15px;font-family:inherit;cursor:pointer}
+
 /* === V9 Interactive map === */
 .trip-map-controls{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}
 .trip-map-controls label{font-family:inherit;font-size:17px;color:#6a2e24}
@@ -1323,7 +1332,12 @@ body.started .bottom-nav{display:grid!important}
         <label>📌 ประเภท <select id="tripMapKind" aria-label="ประเภทหมุด"><option value="all">ทุกประเภท</option><option value="place">🏯 ที่เที่ยว</option><option value="food">🍜 ร้านอาหาร</option></select></label>
       </div>
       <div class="trip-map-mini"><div class="key">🏯 ที่เที่ยว</div><div class="key">🍜 FOOD</div><div class="key">🥐 CAFE</div></div>
+      <div class="trip-map-tools">
+       <button type="button" id="tripMapReload" class="trip-map-tool">🔄 โหลดแผนที่ใหม่</button>
+       <button type="button" id="tripMapSource" class="trip-map-tool">🗺️ เปลี่ยนแหล่งแผนที่</button>
+      </div>
       <div id="tripMap" class="trip-map-frame" role="region" aria-label="แผนที่ทริปเซี่ยงไฮ้และซูโจว"></div>
+      <p class="trip-map-hint" id="tripMapTileStatus">แหล่งแผนที่: กำลังโหลด…</p>
       <p class="trip-map-hint" id="tripMapStatus">กำลังเตรียมแผนที่... หมุดเป็นพิกัดโดยประมาณเพื่อช่วยดูย่านและลำดับสถานที่ ไม่ใช่ GPS หน้าร้านที่ยืนยันแล้ว</p>
       <p class="trip-map-hint">🚶 เส้นทางจริงและเวลาเดินทางให้ตรวจใน Amap ทุกครั้ง โดยเฉพาะในจีนที่บริการแผนที่อาจใช้ระบบพิกัดต่างกัน</p>
       <div id="tripMapList" class="trip-map-list"></div>
@@ -3191,36 +3205,89 @@ function buildTripMapList(rows){
    entry.append(button,link);list.appendChild(entry);
  });
 }
+// V10: alternate raster tile sources; tile load errors are displayed rather than hidden.
+const TRIP_TILE_SOURCES=[
+ {name:'OpenStreetMap', url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png', attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'},
+ {name:'OSM Humanitarian', url:'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', attribution:'&copy; OpenStreetMap contributors, tiles by <a href="https://www.hotosm.org/">HOT</a>'}
+];
+let tripTileSource=0,tripTileLayer=null,tripMapResizeObserver=null,tripMapErrorCount=0,tripMapLoadCount=0;
+let tripMapRefitPending=false;
+function tripMapSetTiles(){
+ if(!tripLeafletMap)return;
+ if(tripTileLayer)tripLeafletMap.removeLayer(tripTileLayer);
+ tripMapErrorCount=0;tripMapLoadCount=0;
+ const src=TRIP_TILE_SOURCES[tripTileSource];
+ tripTileLayer=L.tileLayer(src.url,{attribution:src.attribution,maxZoom:18,keepBuffer:3,updateWhenIdle:true});
+ tripTileLayer.on('tileerror',()=>{tripMapErrorCount++;tripMapUpdateTileStatus();});
+ tripTileLayer.on('tileload',()=>{tripMapLoadCount++;tripMapUpdateTileStatus();});
+ tripTileLayer.on('load',tripMapUpdateTileStatus);
+ tripTileLayer.addTo(tripLeafletMap);
+ tripMapUpdateTileStatus();
+}
+function tripMapUpdateTileStatus(){
+ const status=document.getElementById('tripMapTileStatus');
+ if(!status)return;
+ const provider=TRIP_TILE_SOURCES[tripTileSource].name;
+ status.textContent=tripMapErrorCount?`⚠️ ${provider}: โหลดภาพแผนที่ไม่สำเร็จ ${tripMapErrorCount} ช่อง · ลองกด “เปลี่ยนแหล่งแผนที่”`:`แหล่งแผนที่: ${provider} · โหลดได้ ${tripMapLoadCount} ช่อง`;
+}
+function tripMapFit(rows){
+ if(!tripLeafletMap)return;
+ // Make Leaflet recompute the visible box BEFORE fitBounds.
+ tripLeafletMap.invalidateSize({pan:false,animate:false});
+ const coords=rows.map(row=>row.coord);
+ if(coords.length>1)tripLeafletMap.fitBounds(L.latLngBounds(coords),{padding:[24,24],maxZoom:14,animate:false});
+ else if(coords.length)tripLeafletMap.setView(coords[0],14,{animate:false});
+}
 function updateTripMap(){
  const rows=tripMapRows();buildTripMapList(rows);
  const status=document.getElementById('tripMapStatus');
- if(!window.L){status.textContent='แผนที่ยังโหลดไม่ได้ (ต้องต่ออินเทอร์เน็ต) แต่กด AMAP ที่รายชื่อด้านล่างได้ตามปกติ';return;}
+ if(!window.L){status.textContent='แผนที่ยังโหลดไม่ได้ (ต้องต่ออินเทอร์เน็ต) แต่กด AMAP ที่รายชื่อด้านล่างได้';return;}
  if(!tripLeafletMap){
-   tripLeafletMap=L.map('tripMap',{zoomControl:true,scrollWheelZoom:false}).setView([31.23,121.48],12);
-   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:18}).addTo(tripLeafletMap);
+   tripLeafletMap=L.map('tripMap',{zoomControl:true,scrollWheelZoom:false,preferCanvas:false,fadeAnimation:false}).setView([31.23,121.48],12);
+   tripMapSetTiles();
    tripMarkerLayer=L.layerGroup().addTo(tripLeafletMap);
+   if(window.ResizeObserver){
+     tripMapResizeObserver=new ResizeObserver(()=>{
+       if(!document.getElementById('mapPanel').hidden && tripLeafletMap){
+         tripLeafletMap.invalidateSize({pan:false,animate:false});
+       }
+     });
+     tripMapResizeObserver.observe(document.getElementById('tripMap'));
+   }
  }
  tripMarkerLayer.clearLayers();
- const bounds=[];
  rows.forEach(row=>{
    const icon=L.divIcon({className:'',html:`<div class="trip-map-marker ${row.kind} ${row.optional?'optional':''}">${mapIconFor(row)}</div>`,iconSize:[36,36],iconAnchor:[18,18]});
    const marker=L.marker(row.coord,{icon}).addTo(tripMarkerLayer);
    const popup=document.createElement('div');popup.className='trip-map-popup';
    const strong=document.createElement('strong');strong.textContent=`DAY ${row.day} · ${row.name}`;
-   const note=document.createElement('div');note.textContent=`${row.kind==='food'?(row.slot||'FOOD'):'จุดเที่ยวใน PLAN'} · พิกัดบนแผนที่โดยประมาณ`;
+   const note=document.createElement('div');note.textContent=`${row.kind==='food'?(row.slot||'FOOD'):'จุดเที่ยวใน PLAN'} · พิกัดโดยประมาณ`;
    const a=document.createElement('a');a.href=mapUrl(row.map);a.target='_blank';a.rel='noopener noreferrer';a.textContent='📍 เปิดนำทางใน Amap';
-   popup.append(strong,note,a);marker.bindPopup(popup);row.marker=marker;bounds.push(row.coord);
+   popup.append(strong,note,a);marker.bindPopup(popup);row.marker=marker;
  });
- if(bounds.length>1)tripLeafletMap.fitBounds(bounds,{padding:[26,26],maxZoom:14});
- else if(bounds.length)tripLeafletMap.setView(bounds[0],14);
- setTimeout(()=>tripLeafletMap?.invalidateSize(),100);
+ // The first paint after changing a hidden tab is a stable place to measure layout.
+ requestAnimationFrame(()=>requestAnimationFrame(()=>tripMapFit(rows)));
  const day=mapDisplayDay();
- status.textContent=`แสดง ${rows.length} หมุด${day==='all'?' ทุกวัน':' DAY '+day} · เป็นจุดช่วยวางแผนโดยประมาณ อาจคลาดเคลื่อนจากตำแหน่งหน้าร้านจริง · เปิด Amap เพื่อนำทาง`;
+ status.textContent=`แสดง ${rows.length} หมุด${day==='all'?' ทุกวัน':' DAY '+day} · เป็นพิกัดวางแผนโดยประมาณ ไม่ใช่ตำแหน่งทางเข้าที่ตรวจสอบแล้ว`;
 }
+function tripMapReloadTiles(){
+ if(!tripLeafletMap)return;
+ tripLeafletMap.invalidateSize({pan:false,animate:false});
+ if(tripTileLayer)tripTileLayer.redraw();
+}
+function tripMapSwitchSource(){
+ if(!tripLeafletMap)updateTripMap();
+ tripTileSource=(tripTileSource+1)%TRIP_TILE_SOURCES.length;
+ tripMapSetTiles();
+ tripLeafletMap.invalidateSize({pan:false,animate:false});
+}
+
 function initTripMap(){
  tripMapPoints=[...getMapPlaceRows(),...getMapFoodRows()];
  document.getElementById('tripMapDay').addEventListener('change',updateTripMap);
  document.getElementById('tripMapKind').addEventListener('change',updateTripMap);
+ document.getElementById('tripMapReload').addEventListener('click',tripMapReloadTiles);
+ document.getElementById('tripMapSource').addEventListener('click',tripMapSwitchSource);
 }
 
 function switchTab(tab){
