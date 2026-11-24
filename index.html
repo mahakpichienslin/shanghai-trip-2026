@@ -1218,7 +1218,27 @@ body.started .bottom-nav{display:grid!important}
 .trip-map-entry-actions a.primary{background:#ffc94e;border-color:#a66e2c;color:#4e260e}
 .trip-map-hint{font-size:14px;line-height:1.5;color:#735949}
 .trip-map-daycount{font-weight:bold;color:#812f23}
+
+/* V12 — interactive dark vector map, as opposed to raster OSM squares */
+.trip-map-frame{position:relative;isolation:isolate;width:100%;height:min(70vh,590px);min-height:390px;border:3px solid #7e432e;border-radius:14px;overflow:hidden;background:#162334}
+.trip-map-frame .maplibregl-map{font-family:system-ui,-apple-system,Arial,sans-serif}
+.trip-map-frame .maplibregl-ctrl-attrib{font-size:10px}
+.trip-map-pill{height:34px;min-width:34px;display:flex;align-items:center;justify-content:center;background:#243246;border:2px solid #69778a;border-radius:50%;font-size:17px;box-shadow:0 2px 8px #0009;cursor:pointer;transition:transform .1s}
+.trip-map-pill.is-selected{border:2px solid #ffd25b;background:#603c21;transform:scale(1.18)}
+.trip-map-pill.is-option{border-style:dashed;opacity:.85}
+.trip-map-tooltip{font-size:13px;font-family:system-ui,Arial,sans-serif;color:#213044;line-height:1.5;max-width:230px}
+.trip-map-tooltip h3{font-size:15px;margin:0 0 4px;color:#712b20}
+.trip-map-tooltip a{display:inline-flex;margin:4px 6px 0 0;color:#812d21;font-weight:bold;text-decoration:underline}
+.trip-map-quick{display:flex;gap:7px;margin:9px 0;flex-wrap:wrap}
+.trip-map-quick button{padding:7px 9px;background:#fff8e9;border:1px solid #c8a58c;color:#773928;border-radius:8px;font-size:14px;cursor:pointer}
+.trip-map-entry{display:flex;align-items:center;justify-content:space-between;gap:8px;border:2px solid #dfc9ac;border-radius:10px;padding:9px;background:#fffaf0}
+.trip-map-entry button{border:0;background:transparent;cursor:pointer;color:#782c23;text-align:left;font:inherit;font-size:15px;line-height:1.35;flex:1}
+.trip-map-entry a{font-size:14px;flex-shrink:0;color:#8a2519;font-weight:bold}
+.trip-map-blank{position:absolute;inset:0;background:#162334;color:#fff4da;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;z-index:2;font-size:16px;line-height:1.6}
+@media(max-width:420px){.trip-map-frame{min-height:365px}.trip-map-controls label{font-size:14px}}
+
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@6.19.0/dist/maplibre-gl.css">
 </head>
 <body>
   <button id="musicBtn" class="pixel-btn music-btn">
@@ -1309,17 +1329,18 @@ body.started .bottom-nav{display:grid!important}
   </section>
 
   <section id="mapPanel" class="app-panel" hidden>
-    <div class="section-heading">🗺️ WALKING MAP</div>
-    <p class="section-intro">เลือกจุดหมาย แล้วเปิดเส้นทางเดินใน Google Maps, Apple Maps หรือ Amap · ไม่ต้องรอโหลดภาพแผนที่ในเว็บ</p>
+    <div class="section-heading">🗺️ TRIP MAP · DARK</div>
+    <p class="section-intro">แผนที่สีเข้มพร้อมหมุดเหมือนตัวอย่าง · กดหมุดดูร้านและสถานที่ · นำทางจริงผ่าน Amap</p>
     <div class="pixel-box utility-card">
       <div class="trip-map-controls">
-        <label>📅 วันเที่ยว <select id="tripMapDay" aria-label="เลือกวันเที่ยว"><option value="all">ALL DAYS</option><option value="1">DAY 1 · SHANGHAI</option><option value="2">DAY 2 · CAFE</option><option value="3">DAY 3 · DISNEY</option><option value="4">DAY 4 · SUZHOU</option><option value="5">DAY 5 · RETURN</option></select></label>
-        <label>📌 ประเภท <select id="tripMapKind" aria-label="ประเภทสถานที่"><option value="all">ทุกประเภท</option><option value="place">🏯 ที่เที่ยว</option><option value="food">🍜 ร้านอาหาร</option></select></label>
+        <label>📅 วันเที่ยว <select id="tripMapDay" aria-label="เลือกวันเที่ยว"><option value="2">DAY 2 · CAFE</option><option value="1">DAY 1 · SHANGHAI</option><option value="3">DAY 3 · DISNEY</option><option value="4">DAY 4 · SUZHOU</option><option value="5">DAY 5 · RETURN</option><option value="all">ALL DAYS</option></select></label>
+        <label>📌 ประเภท <select id="tripMapKind" aria-label="ประเภทสถานที่"><option value="all">ทุกประเภท</option><option value="place">🏯 ที่เที่ยว</option><option value="food">🍜 ร้านอาหาร / คาเฟ่</option></select></label>
       </div>
       <div class="trip-map-mini"><div class="key">🏯 ที่เที่ยว</div><div class="key">🍜 FOOD</div><div class="key">🥐 CAFE</div></div>
-      <div class="trip-map-status" id="tripMapStatus" aria-live="polite">กำลังแสดงรายการสถานที่...</div>
-      <p class="trip-map-hint">🚶 <strong>เดินจากที่อยู่ตอนนี้</strong> ใช้ตำแหน่งในแอปแผนที่ที่เลือก · <strong>เดินจากจุดก่อนหน้า</strong> เป็นเส้นทางระหว่างจุดตามลำดับในแผน ไม่ใช่เวลาที่คำนวณไว้แล้ว</p>
-      <p class="trip-map-hint">🇨🇳 ในจีน Amap เหมาะสำหรับตรวจเส้นทางจริง ส่วน Google Maps อาจใช้งานไม่ได้บนบางเครือข่าย และ Apple Maps ให้ตรวจตำแหน่งร้านอีกครั้ง</p>
+      <div class="trip-map-quick"><button id="mapFitBtn" type="button">🎯 แสดงทุกหมุด</button><button id="mapStyleBtn" type="button">🌗 เปลี่ยนสีแผนที่</button></div>
+      <div id="tripMap" class="trip-map-frame" role="region" aria-label="แผนที่เวกเตอร์ Shanghai Suzhou สีเข้ม"><div id="tripMapBlank" class="trip-map-blank">แผนที่ออนไลน์ไม่พร้อม · ใช้รายชื่อด้านล่างเปิด Amap ได้</div></div>
+      <p class="trip-map-status" id="tripMapStatus" aria-live="polite">กำลังเตรียมแผนที่เวกเตอร์...</p>
+      <p class="trip-map-hint">📍 หมุดเป็นตำแหน่งโดยประมาณเพื่อวางแผน เส้นประคือการเชื่อมจุดตรง ๆ ไม่ใช่เส้นทางเดินตามถนน · กด Amap เพื่อดูทางเดิน/เวลาเดินทางจริง</p>
       <div id="tripMapList" class="trip-map-list"></div>
     </div>
   </section>
@@ -3140,22 +3161,26 @@ function renderPhrases(){
 }
 async function copyText(value){try{await navigator.clipboard.writeText(value);alert('คัดลอกแล้ว');}catch(e){prompt('คัดลอกข้อความนี้',value);}}
 
-// V11: Map launchers; intentionally no embedded tile map.
-// Location query uses place name + city, rather than unverified approximate coordinates.
-let tripMapPoints=[];
+// V12: Dark interactive vector map. External map style + library require internet.
+const TRIP_MAP_PLACE_COORDS={"d1-hotel":[31.2354,121.4691],"d1-huanghe":[31.2359,121.4695],"d1-peoplespark":[31.2327,121.4681],"d1-nanjing":[31.2369,121.4792],"d1-rockbund":[31.2445,121.4899],"d1-bund":[31.241,121.4912],"d1-bbq":[31.2243,121.4821],"d2-wukangmansion":[31.2038,121.4381],"d2-wukangroad":[31.2091,121.4385],"d2-anfu":[31.213,121.4425],"d2-westbundmuseum":[31.1801,121.459],"d2-longmuseum":[31.1829,121.463],"d2-westbundriver":[31.1865,121.4655],"d3-disneyarrive":[31.1432,121.6573],"d3-disneyrides":[31.1432,121.6573],"d3-disneyparade":[31.1432,121.6573],"d3-disneyfireworks":[31.1432,121.6573],"d4-suzhoumuseum":[31.3245,120.6308],"d4-humblegarden":[31.3268,120.629],"d4-pingjiang":[31.3159,120.6362],"d4-shantang":[31.32,120.5986],"d5-checkout":[31.2354,121.4691],"d5-yugarden":[31.2271,121.4915],"d5-yuyuan":[31.2281,121.4917],"d5-pvg":[31.1442,121.8083]};
+const TRIP_MAP_FOOD_COORDS={"定兴路蛋饼摊":[31.2358,121.463],"小杨生煎":[31.2356,121.4698],"陶陶居":[31.2335,121.4688],"费大厨辣椒炒肉":[31.233,121.4778],"莱莱小笼":[31.2408,121.4794],"很久以前羊肉串":[31.2235,121.4819],"BUTTERFUL & CREAMOROUS":[31.2312,121.4564],"AMAM LONBAKERY TOWN":[31.2312,121.456],"阿元来了":[31.2178,121.4579],"九龙冰室":[31.2066,121.4673],"New York Bagelous Museum":[31.2178,121.4764],"小菜园":[31.24,121.5008],"好利来":[31.2403,121.5006],"裕兴记":[31.3259,120.6348],"桃花源记":[31.3175,120.6355],"伏羲古琴文化会馆":[31.317,120.636],"松鹤楼":[31.3197,120.5982],"上海老饭店":[31.228,121.4902],"Shanghai Lao Fan Dian":[31.228,121.4902]};
+let tripMapPoints=[], tripVectorMap=null, tripMapLibrary=null, tripMapMarkers=[], tripMapStyle='dark', tripMapLoading=false, tripMapSelected=null;
 const mapDisplayDay=()=>document.getElementById('tripMapDay').value;
 function getMapPlaceRows(){
  const rows=[];
  itinerary.forEach(day=>day.places.forEach(place=>{
-  if(day.day===3 && place.id!=='d3-disneyarrive')return; // Disneyland park grouped as one locator
-  rows.push({id:place.id,day:day.day,kind:'place',name:place.name,map:place.map,optional:false});
+  const coord=TRIP_MAP_PLACE_COORDS[place.id];
+  if(!coord || (day.day===3 && place.id!=='d3-disneyarrive'))return;
+  rows.push({id:place.id,day:day.day,kind:'place',name:place.name,map:place.map,coord,optional:false});
  }));
  return rows;
 }
 function getMapFoodRows(){
  const rows=[];
- FOOD_GUIDE.forEach(g=>g.items.forEach((f,index)=>{
-  rows.push({id:`food-${g.day}-${index}-${rows.length}`,day:g.day,kind:'food',name:f.name,map:f.map,optional:!!f.optional,slot:f.slot,foodKind:f.kind});
+ FOOD_GUIDE.forEach(g=>g.items.forEach((food,index)=>{
+  const key=Object.keys(TRIP_MAP_FOOD_COORDS).find(k=>food.name.includes(k));
+  if(!key)return;
+  rows.push({id:`food-${g.day}-${index}-${rows.length}`,day:g.day,kind:'food',name:food.name,map:food.map,coord:TRIP_MAP_FOOD_COORDS[key],optional:!!food.optional,slot:food.slot,foodKind:food.kind});
  }));
  return rows;
 }
@@ -3166,54 +3191,119 @@ function tripMapRows(){
 function mapIconFor(row){return row.kind==='place'?'🏯':row.foodKind==='คาเฟ่'?'🥐':row.foodKind==='ของฝาก'?'🎁':'🍜';}
 function mapSearchTerm(row){
  const raw=String(row.map||row.name||'');
- // Internal Amap URLs are provider-place identifiers; don't use those as Google search terms.
- const name=String(row.name||'').replace(/ · .*/, '').trim();
+ const name=String(row.name||'').replace(/ · .*/,'').trim();
  const city=row.day===4?'Suzhou Jiangsu China':'Shanghai China';
- if(/^https?:\/\//.test(raw)) return `${name} ${city}`;
- return `${raw} ${city}`;
+ return (/^https?:\/\//.test(raw)?name:raw)+' '+city;
 }
-function gMapsWalking(row,from){
+function mapLink(row,from){
  const q=new URLSearchParams({api:'1',destination:mapSearchTerm(row),travelmode:'walking'});
  if(from)q.set('origin',mapSearchTerm(from));
  return 'https://www.google.com/maps/dir/?'+q.toString();
 }
-function appleMapsWalking(row,from){
- const q=new URLSearchParams({daddr:mapSearchTerm(row),dirflg:'w'});
- if(from)q.set('saddr',mapSearchTerm(from));
- return 'https://maps.apple.com/?'+q.toString();
-}
-function makeMapLink(text,url,primary){
- const a=document.createElement('a');a.textContent=text;a.href=url;a.target='_blank';a.rel='noopener noreferrer';
- if(primary)a.className='primary';return a;
-}
 function buildTripMapList(rows){
  const list=document.getElementById('tripMapList');list.replaceChildren();
- if(!rows.length){list.textContent='ไม่พบจุดหมายตามตัวกรองนี้';return;}
- rows.forEach((row,i)=>{
-  const entry=document.createElement('article');entry.className='trip-map-entry'+(row.optional?' option':'');
-  const head=document.createElement('h3');head.textContent=`${mapIconFor(row)} DAY ${row.day} · ${row.name}${row.optional?' · OPTION':''}`;
-  const meta=document.createElement('p');meta.className='trip-map-meta';meta.textContent=row.kind==='food'?(row.slot||row.foodKind||'ร้านอาหาร'):'จุดเที่ยวใน PLAN';
-  const actions=document.createElement('div');actions.className='trip-map-entry-actions';
-  actions.appendChild(makeMapLink('🚶 Google Maps',gMapsWalking(row),true));
-  actions.appendChild(makeMapLink('🍎 Apple Maps',appleMapsWalking(row)));
-  actions.appendChild(makeMapLink('📍 Amap',mapUrl(row.map)));
-  // The previous stop route is meaningful only if the full list is displayed for one day.
-  const prev=i>0?rows[i-1]:null;
-  if(prev && prev.day===row.day){
-    actions.appendChild(makeMapLink('↗ เดินจากจุดก่อนหน้า',gMapsWalking(row,prev)));
-  }
-  entry.append(head,meta,actions);list.appendChild(entry);
+ if(!rows.length){list.textContent='ไม่พบจุดหมาย';return;}
+ rows.forEach(row=>{
+  const entry=document.createElement('div');entry.className='trip-map-entry';
+  const btn=document.createElement('button');btn.type='button';
+  btn.textContent=`${mapIconFor(row)} DAY ${row.day} · ${row.name}${row.optional?' · OPTION':''}`;
+  btn.addEventListener('click',()=>focusTripMarker(row));
+  const a=document.createElement('a');a.href=mapUrl(row.map);a.target='_blank';a.rel='noopener noreferrer';a.textContent='AMAP ↗';
+  entry.append(btn,a);list.appendChild(entry);
  });
+}
+function tripMapPopupElement(row){
+ const el=document.createElement('div');el.className='trip-map-tooltip';
+ const h=document.createElement('h3');h.textContent=`${mapIconFor(row)} DAY ${row.day} · ${row.name}`;
+ const p=document.createElement('div');p.textContent=`${row.kind==='food'?(row.slot||row.foodKind||'ร้านอาหาร'):'สถานที่เที่ยว'} · พิกัดโดยประมาณ`;
+ const amap=document.createElement('a');amap.href=mapUrl(row.map);amap.target='_blank';amap.rel='noopener noreferrer';amap.textContent='📍 เปิด Amap';
+ const walk=document.createElement('a');walk.href=mapLink(row);walk.target='_blank';walk.rel='noopener noreferrer';walk.textContent='🚶 ดูทางเดิน';
+ el.append(h,p,amap,walk);return el;
+}
+function focusTripMarker(row){
+ if(!tripVectorMap){document.getElementById('tripMap').scrollIntoView({behavior:'smooth',block:'center'});return;}
+ tripMapSelected=row.id;
+ tripVectorMap.easeTo({center:[row.coord[1],row.coord[0]],zoom:15,duration:650});
+ const marker=tripMapMarkers.find(m=>m.row.id===row.id);
+ if(marker){marker.marker.togglePopup();}
+ document.getElementById('tripMap').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function fitTripBounds(rows){
+ if(!tripVectorMap || !tripMapLibrary || !rows.length)return;
+ const b=new tripMapLibrary.LngLatBounds();
+ rows.forEach(r=>b.extend([r.coord[1],r.coord[0]]));
+ if(rows.length===1)tripVectorMap.easeTo({center:[rows[0].coord[1],rows[0].coord[0]],zoom:14,duration:400});
+ else tripVectorMap.fitBounds(b,{padding:45,maxZoom:13.8,duration:450});
+}
+function clearTripMarkers(){tripMapMarkers.forEach(m=>m.marker.remove());tripMapMarkers=[];}
+function repaintTripMarkers(){
+ if(!tripVectorMap||!tripMapLibrary)return;
+ const rows=tripMapRows();clearTripMarkers();
+ rows.forEach(row=>{
+  const el=document.createElement('div');el.className='trip-map-pill'+(row.optional?' is-option':'');el.textContent=mapIconFor(row);el.title=row.name;
+  const popup=new tripMapLibrary.Popup({offset:22,maxWidth:'260px'}).setDOMContent(tripMapPopupElement(row));
+  const marker=new tripMapLibrary.Marker({element:el,anchor:'center'}).setLngLat([row.coord[1],row.coord[0]]).setPopup(popup).addTo(tripVectorMap);
+  marker.getElement().addEventListener('click',()=>{document.querySelectorAll('.trip-map-pill').forEach(e=>e.classList.remove('is-selected'));el.classList.add('is-selected');});
+  tripMapMarkers.push({row,marker});
+ });
+ // Dotted lines connect listed points only when one day is selected. This is NOT a pedestrian route.
+ const day=mapDisplayDay();
+ const features=[];
+ if(day!=='all'){
+  const arr=rows.filter(r=>!r.optional && r.kind==='place');
+  if(arr.length>=2)features.push({type:'Feature',properties:{},geometry:{type:'LineString',coordinates:arr.map(r=>[r.coord[1],r.coord[0]])}});
+  const foods=rows.filter(r=>!r.optional&&r.kind==='food');
+  if(foods.length>=2)features.push({type:'Feature',properties:{},geometry:{type:'LineString',coordinates:foods.map(r=>[r.coord[1],r.coord[0]])}});
+ }
+ const source=tripVectorMap.getSource('trip-guide-lines');
+ if(source)source.setData({type:'FeatureCollection',features});
+ fitTripBounds(rows);
+ document.getElementById('tripMapStatus').textContent=`📍 ${rows.length} หมุด · ${day==='all'?'ทุกวัน':'DAY '+day} · กดหมุดเพื่อดูรายละเอียด (ตำแหน่งประมาณ)`;
 }
 function updateTripMap(){
  const rows=tripMapRows();buildTripMapList(rows);
- const day=mapDisplayDay();
- document.getElementById('tripMapStatus').textContent=`แสดง ${rows.length} จุดหมาย${day==='all'?' รวมทุกวัน':' ใน DAY '+day} · กด Google Maps / Apple Maps / Amap เพื่อดูเส้นทางเดินและเวลาเดินทางล่าสุด`;
+ if(tripVectorMap && tripVectorMap.isStyleLoaded())repaintTripMarkers();
+ else document.getElementById('tripMapStatus').textContent=`เตรียม ${rows.length} หมุด · แผนที่ออนไลน์ต้องใช้อินเทอร์เน็ต`;
+}
+async function ensureTripVectorMap(){
+ if(tripVectorMap){tripVectorMap.resize();updateTripMap();return;}
+ if(tripMapLoading)return;
+ tripMapLoading=true;
+ const status=document.getElementById('tripMapStatus');status.textContent='กำลังโหลดแผนที่เวกเตอร์สีเข้ม...';
+ try{
+  tripMapLibrary=await import('https://cdn.jsdelivr.net/npm/maplibre-gl@6.19.0/dist/maplibre-gl.mjs');
+  if(!tripMapLibrary.supported()){throw Error('อุปกรณ์หรือเบราว์เซอร์ไม่รองรับ WebGL');}
+  tripVectorMap=new tripMapLibrary.Map({container:'tripMap',style:'https://tiles.openfreemap.org/styles/'+tripMapStyle,center:[121.47,31.23],zoom:11,attributionControl:true,dragRotate:false,pitchWithRotate:false,maxPitch:0});
+  tripVectorMap.addControl(new tripMapLibrary.NavigationControl({showCompass:false}),'top-right');
+  tripVectorMap.on('load',()=>{
+   tripVectorMap.addSource('trip-guide-lines',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+   tripVectorMap.addLayer({id:'trip-guide-dashes',type:'line',source:'trip-guide-lines',paint:{'line-color':'#F6F8FF','line-width':2.7,'line-dasharray':[1.3,1.9],'line-opacity':.85}});
+   updateTripMap();
+  });
+  tripVectorMap.on('error',()=>{status.textContent='เครือข่ายอาจไม่สามารถโหลดแผนที่ทั้งหมดได้ · รายชื่อและลิงก์ Amap ด้านล่างยังใช้ได้';});
+ }catch(error){
+  const blank=document.getElementById('tripMapBlank');blank.style.display='flex';
+  status.textContent='แผนที่ออนไลน์เปิดไม่ได้ในเครือข่ายนี้ · ใช้ AMAP ด้านล่างได้ ('+error.message+')';
+ }finally{tripMapLoading=false;}
 }
 function initTripMap(){
  tripMapPoints=[...getMapPlaceRows(),...getMapFoodRows()];
  document.getElementById('tripMapDay').addEventListener('change',updateTripMap);
  document.getElementById('tripMapKind').addEventListener('change',updateTripMap);
+ document.getElementById('mapFitBtn').addEventListener('click',()=>fitTripBounds(tripMapRows()));
+ document.getElementById('mapStyleBtn').addEventListener('click',()=>{
+  if(!tripVectorMap)return;
+  tripMapStyle=tripMapStyle==='dark'?'liberty':'dark';
+  tripVectorMap.setStyle('https://tiles.openfreemap.org/styles/'+tripMapStyle);
+  tripVectorMap.once('style.load',()=>{
+   if(!tripVectorMap.getSource('trip-guide-lines')){
+    tripVectorMap.addSource('trip-guide-lines',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+    tripVectorMap.addLayer({id:'trip-guide-dashes',type:'line',source:'trip-guide-lines',paint:{'line-color':tripMapStyle==='dark'?'#ffffff':'#74412b','line-width':2.7,'line-dasharray':[1.3,1.9]}});
+   }
+   repaintTripMarkers();
+  });
+ });
+ updateTripMap();
 }
 
 function switchTab(tab){
@@ -3222,7 +3312,7 @@ function switchTab(tab){
   const active=btn.dataset.tab===tab;btn.classList.toggle('active',active);
   if(active)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current');
  });
- if(tab==='map') updateTripMap();
+ if(tab==='map'){ updateTripMap();requestAnimationFrame(()=>ensureTripVectorMap()); }
  window.scrollTo({top:0,behavior:'instant'});
 }
 function initCompanion(){
